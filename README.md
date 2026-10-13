@@ -20,6 +20,7 @@ The project concept and learner requirements came from the project owner. Codex 
 ## What works
 
 - Multiple saved goals with independent plans, weekly progress and evidence.
+- Remembered learning picks with Saved/Reading/Read states and a Today resume view.
 - Web-researched learning guides beyond the admin catalogue, with traceable sources and location scope.
 - Four-week introductory plans, weekly work and check-ins; unsupported goals do not receive unrelated computing templates.
 - Configurable practice quizzes: 1–20 questions, three difficulty levels, optional timer, answer comparison and cited lesson links.
@@ -137,4 +138,4 @@ npm --prefix web run format:check
 
 ## Proof-of-concept boundaries
 
-English-first; Nigerian Pidgin, French and other languages are future work. Maps show regional context, not verified institution pins. Reminders are in-app, not background email/push. Telegram has a polling adapter but live account linking and credentials verification remain pending. LinkedIn support is a goal-specific search/review bridge, not a scraping or bulk-ingestion integration. Research and quizzes require available model access; AI-generated practice is not a validated exam. See the [full reviewer guide](docs/README.md) for details.
+English-first; Nigerian Pidgin, French and other languages are future work. Maps show regional context, not verified institution pins. Reminders are in-app, not background email/push. Telegram is a future phone-based check-in and guidance feature. Its polling adapter is a scaffold; live account linking and delivery are not yet implemented or verified. LinkedIn support is a goal-specific search/review bridge, not a scraping or bulk-ingestion integration. Research and quizzes require available model access; AI-generated practice is not a validated exam. See the [full reviewer guide](docs/README.md) for details.

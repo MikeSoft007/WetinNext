@@ -1,3 +1,4 @@
+import ContinueLearning from "../learning/ContinueLearning";
 import GoalPreparation, { FocusReminder } from "../progress/GoalPreparation";
 import GoalSwitcher from "../goals/GoalSwitcher";
 import SkillTracker from "../progress/SkillTracker";
@@ -114,7 +115,6 @@ export default function LearnerWorkspace({
     [hours, setHours] = useState(3),
     [device, setDevice] = useState("laptop"),
     [lowData, setLowData] = useState(true),
-    [telegram, setTelegram] = useState<string | null>(null),
     [ready, setReady] = useState(false);
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
@@ -205,7 +205,6 @@ export default function LearnerWorkspace({
           telegram_bot_url: string | null;
           demo_mode: boolean;
         }>("/health");
-        setTelegram(health.telegram_bot_url);
         if (health.demo_mode) await api("/demo/session", { method: "POST" });
         const [s, r, h] = await Promise.all([
           api<State>("/me"),
@@ -455,29 +454,13 @@ export default function LearnerWorkspace({
           <kbd>/</kbd>
         </label>
         <div className="top-actions">
-          {telegram ? (
-            <a
-              className="telegram-button"
-              href={telegram}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Open Telegram bot"
-            >
-              <Send size={18} />
-            </a>
-          ) : (
-            <button
-              className="telegram-button"
-              aria-label="Telegram bot connection status"
-              onClick={() =>
-                setToast(
-                  "Telegram is not connected yet. A real bot URL can be configured on the backend.",
-                )
-              }
-            >
-              <Send size={18} />
-            </button>
-          )}
+          <span
+            className="telegram-roadmap"
+            title="Future feature: phone-based check-ins and next steps via Telegram"
+          >
+            <Send size={15} />
+            <span>Telegram · coming later</span>
+          </span>
           <span
             className="streak"
             title="Consecutive calendar weeks with a check-in"
@@ -624,7 +607,12 @@ export default function LearnerWorkspace({
           </div>
         ) : (
           <>
-            {page === "Today" && <FocusReminder state={state} />}
+            {page === "Today" && (
+              <>
+                <FocusReminder state={state} />
+                <ContinueLearning state={state} market={market} />
+              </>
+            )}
             {page === "Today" && !plan && (
               <section className="card next-task today-start-card">
                 <h2>

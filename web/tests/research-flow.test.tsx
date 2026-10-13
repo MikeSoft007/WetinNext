@@ -210,3 +210,66 @@ test("assessment guide link navigates to the practice section", async () => {
   expect(location.hash).toBe("#practice-check");
   history.replaceState({}, "", "/");
 });
+
+test("learning choice saves to the current goal rather than browser-only state", async () => {
+  vi.mocked(api).mockImplementation(async (path, init) =>
+    path.startsWith("/me/research")
+      ? { id: "saved-guide", status: "complete", stage: "Ready", result: guide }
+      : path === "/research/saved-guide"
+        ? { status: "complete", stage: "Ready", result: guide }
+        : path.startsWith("/me/learning-picks")
+          ? init?.method === "POST"
+            ? { id: "pick", url: guide.resources[0].url, status: "saved" }
+            : []
+          : {},
+  );
+  render(
+    <GoalResearch
+      state={state}
+      market="Rwanda"
+      onSaved={vi.fn()}
+      onSetup={vi.fn()}
+    />,
+  );
+  await userEvent
+    .setup()
+    .click(await screen.findByRole("button", { name: "Save for later" }));
+  expect(
+    await screen.findByRole("button", { name: "Saved to Today" }),
+  ).toBeTruthy();
+  expect(api).toHaveBeenCalledWith("/me/learning-picks", {
+    method: "POST",
+    body: JSON.stringify({
+      research_id: "saved-guide",
+      resource_id: "anatomy",
+    }),
+  });
+});
+
+test("research displays actual source previews while synthesis is running", async () => {
+  const job = {
+    id: "progress",
+    status: "running",
+    stage: "Connecting sources to a four-week beginner plan",
+    source_count: 2,
+    source_preview: [
+      { title: "Official anatomy lesson", url: "https://example.edu/anatomy" },
+    ],
+  };
+  vi.mocked(api).mockImplementation(async (path) =>
+    path.startsWith("/me/research") || path === "/research/progress" ? job : [],
+  );
+  render(
+    <GoalResearch
+      state={state}
+      market="Rwanda"
+      onSaved={vi.fn()}
+      onSetup={vi.fn()}
+    />,
+  );
+  expect(
+    await screen.findByText("2 source pages found · checking relevance"),
+  ).toBeTruthy();
+  expect(screen.getByRole("link", { name: /example.edu/ })).toBeTruthy();
+  expect(screen.queryByText("Guide ready")).toBeNull();
+});

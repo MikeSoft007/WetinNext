@@ -75,3 +75,11 @@ class GoalReminder(Base):
     learner_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     goal_id: Mapped[str] = mapped_column(String(32), primary_key=True)
     payload: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class LearningPick(Base):
+    __tablename__ = "learning_picks"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    learner_id: Mapped[str] = mapped_column(String(128), index=True)
+    goal_id: Mapped[str] = mapped_column(String(32), index=True)
+    payload: Mapped[str] = mapped_column(Text)
