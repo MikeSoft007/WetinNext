@@ -1,0 +1,175 @@
+{
+  "info": {
+    "name": "WetinNext API v1",
+    "description": "Run Create demo session first with the Postman cookie jar enabled. Practice opportunities are synthetic. Delete only your disposable test learner. For real auth, attach your own Supabase Bearer token with demo mode disabled.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000/api/v1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Create demo session",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/demo/session"
+      }
+    },
+    {
+      "name": "Read learner",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/me"
+      }
+    },
+    {
+      "name": "Create pathway",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/me/profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ada\",\n  \"learner_type\": \"student\",\n  \"country\": \"Nigeria\",\n  \"goal\": \"Build data skills for an internship\",\n  \"hours\": 3,\n  \"device\": \"laptop\",\n  \"background\": \"Basic spreadsheets\",\n  \"low_data\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Search opportunities",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/opportunities?country=Nigeria&q=data"
+      }
+    },
+    {
+      "name": "Opportunity detail",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/opportunities/sample-data"
+      }
+    },
+    {
+      "name": "Skill gap assessment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/opportunities/sample-data/assessment"
+      }
+    },
+    {
+      "name": "Complete first task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/weeks/1/check-in",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"done\",\n  \"note\": \"Created a tracker.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Check-in history",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/check-ins"
+      }
+    },
+    {
+      "name": "Adjust availability",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/me/profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hours\": 1,\n  \"device\": \"phone\",\n  \"low_data\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Save interest",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/applications/sample-data",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"interested\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Resources",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/resources"
+      }
+    },
+    {
+      "name": "Delete own test learner",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/me"
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+Sample learner CV — fictional demonstration
+Education
+University student studying computer science.
+Skills
+HTML, CSS, JavaScript, Git, communication.
+Projects
+Built a responsive student club website and documented the setup in a README.
+Experience
+Volunteered with a university coding club, helping beginners practise web fundamentals.
+Career goal
+Prepare for a frontend internship with a practical portfolio project.

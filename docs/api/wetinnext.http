@@ -1,0 +1,51 @@
+# Use with VS Code REST Client or equivalent HTTP tooling.
+# Keep cookies enabled. Run session creation before learner requests.
+@baseUrl = http://127.0.0.1:8000/api/v1
+
+### Health
+GET {{baseUrl}}/health
+
+### Create local demo session (cookie jar enabled)
+POST {{baseUrl}}/demo/session
+
+### Your profile, pathway, progress and streak
+GET {{baseUrl}}/me
+
+### Create a first pathway (409 if one already exists)
+PUT {{baseUrl}}/me/profile
+Content-Type: application/json
+
+{"name":"Ada","learner_type":"student","country":"Nigeria","goal":"Build data skills for an internship","hours":3,"device":"laptop","background":"Basic spreadsheets","low_data":true}
+
+### Filter catalogue by market and keyword
+GET {{baseUrl}}/opportunities?country=Nigeria&q=data
+
+### Review source/evidence-backed practice matching
+GET {{baseUrl}}/opportunities/sample-data/assessment
+
+### Mark the current first task complete
+POST {{baseUrl}}/weeks/1/check-in
+Content-Type: application/json
+
+{"status":"done","note":"Created a tracker and tested filtering."}
+
+### Read history
+GET {{baseUrl}}/check-ins
+
+### Adjust future work; retain completed tasks
+PATCH {{baseUrl}}/me/profile
+Content-Type: application/json
+
+{"hours":1,"device":"phone","low_data":true}
+
+### Save interest (practice listings cannot be marked applied)
+PUT {{baseUrl}}/applications/sample-data
+Content-Type: application/json
+
+{"status":"interested"}
+
+### Resource catalogue
+GET {{baseUrl}}/resources
+
+### Account deletion — run intentionally on your test session only
+DELETE {{baseUrl}}/me

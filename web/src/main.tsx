@@ -1,0 +1,11 @@
+import { createRoot } from "react-dom/client";
+import Experience from "./app/Experience";
+import "@fontsource-variable/manrope";
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "@fontsource/poppins/600.css";
+import "./styles/style.css";
+import "./styles/theme.css";
+import "./styles/quiet.css";
+import "./styles/reference.css";
+createRoot(document.getElementById("root")!).render(<Experience />);
