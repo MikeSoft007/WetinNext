@@ -47,3 +47,7 @@ app.include_router(skills_router, prefix="/api/v1")
 from .preparation import router as preparation_router
 
 app.include_router(preparation_router, prefix="/api/v1")
+
+from .learning_picks import router as learning_picks_router
+
+app.include_router(learning_picks_router, prefix="/api/v1")

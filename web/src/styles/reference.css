@@ -5176,3 +5176,374 @@ textarea {
     justify-content: center;
   }
 }
+/* Compact sourced guide: editorial results, remembered choices, real research phases. */
+.guide-provenance {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 10px;
+  color: #738176;
+  margin: 18px 0 10px;
+}
+.guide-provenance > span:first-child {
+  color: #3c7259;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.source-chips {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 10px 0 18px;
+}
+.source-chips a,
+.source-citation {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px !important;
+  color: #5d7868 !important;
+  text-decoration: none !important;
+  background: #f1f4ee;
+  border-radius: 20px;
+  padding: 5px 9px;
+}
+.research-learning > article {
+  background: #fafbf8;
+  border-radius: 12px;
+  padding: 18px !important;
+  border: 0 !important;
+  gap: 12px !important;
+}
+.research-learning > article > div {
+  min-width: 0;
+  flex: 1;
+}
+.research-learning .research-number {
+  background: #eaf1e6;
+  height: 53px;
+  width: 42px;
+}
+.research-learning h3 {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.research-learning p {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 8px 0 12px;
+}
+.resource-action-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.resource-action-row button {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.resource-access {
+  margin-top: 12px;
+}
+.resource-access summary {
+  font-size: 10px;
+  color: #71806c;
+  cursor: pointer;
+}
+.resource-access small {
+  margin-top: 7px;
+}
+.research-atlas {
+  display: flex !important;
+  gap: 0 !important;
+  justify-content: space-between;
+  padding: 13px 0;
+  margin: 10px 0 !important;
+}
+.research-atlas button {
+  background: transparent !important;
+  padding: 8px 12px !important;
+  flex: 1;
+  border-radius: 0 !important;
+}
+.research-atlas button > svg:first-child {
+  width: 19px;
+}
+.research-atlas strong {
+  font-size: 18px !important;
+}
+.research-atlas small {
+  font-size: 10px !important;
+}
+.research-atlas button > svg:last-child {
+  display: none;
+}
+.research-place {
+  gap: 18px !important;
+}
+.institution-tile {
+  background: #f0f3e8 !important;
+  color: #788766 !important;
+  border-radius: 14px !important;
+  width: 78px !important;
+  height: 84px !important;
+}
+.research-place > div {
+  flex: 1;
+  min-width: 0;
+}
+.research-place h3 {
+  margin: 3px 0 7px !important;
+}
+.research-place .source-citation {
+  margin-bottom: 5px;
+}
+.roadmap-ribbon {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.roadmap-ribbon a {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-start;
+  background: #f1f5ed;
+  border-radius: 10px;
+  padding: 14px !important;
+  color: #3e6850;
+  text-decoration: none;
+  font-size: 11px;
+}
+.roadmap-ribbon a > span {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  background: #dfe9d6;
+  font-size: 11px;
+}
+.roadmap-ribbon strong {
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.roadmap-ribbon small {
+  font-size: 9px;
+  color: #72836a;
+}
+.research-plan li {
+  scroll-margin-top: 80px;
+}
+.assessment-route-visual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 22px 0;
+}
+.assessment-route-visual > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  color: #508264;
+}
+.assessment-route-visual strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3c5d46;
+}
+.assessment-route-visual small {
+  font-size: 10px;
+  color: #76826f;
+}
+.assessment-route-visual > svg {
+  color: #b1c1a4;
+  flex-shrink: 0;
+}
+.research-live-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: #5b8063;
+}
+.research-live-label > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #55916c;
+  animation: research-pulse 1.5s ease-in-out infinite;
+}
+.research-loading .source-chips {
+  justify-content: center;
+}
+.research-loading p {
+  font-size: 12px;
+  color: #738270;
+}
+.research-response {
+  animation: guide-reveal 0.3s ease-out;
+}
+.telegram-roadmap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #87927f;
+  white-space: nowrap;
+}
+.continue-learning {
+  margin: 14px 0 22px;
+}
+.continue-learning > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+.continue-learning h2 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  margin: 7px 0;
+}
+.continue-learning > header > span {
+  font-size: 11px;
+  color: #73856b;
+}
+.continue-learning article {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 0;
+}
+.continue-icon {
+  width: 42px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #edf3e7;
+  color: #5a805b;
+  flex-shrink: 0;
+}
+.continue-learning article > div {
+  flex: 1;
+  min-width: 0;
+}
+.continue-learning article small {
+  font-size: 10px;
+  color: #788570;
+}
+.continue-learning h3 {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 5px 0;
+}
+.continue-learning a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #397151;
+  text-decoration: none;
+}
+.continue-learning .pagination {
+  padding-top: 5px;
+}
+.continue-learning .text-link {
+  font-size: 11px;
+}
+.research-exams > article {
+  padding: 16px 0 !important;
+}
+.research-visual-control {
+  margin: 0 !important;
+}
+.guide-image {
+  max-height: 190px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.guide-image img {
+  object-fit: cover;
+  object-position: 50% 45%;
+  max-height: 170px;
+  width: 100%;
+}
+@keyframes guide-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes research-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (max-width: 700px) {
+  .roadmap-ribbon {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .telegram-roadmap span {
+    display: none;
+  }
+  .research-atlas button {
+    padding: 6px !important;
+    display: flex !important;
+    gap: 7px !important;
+  }
+  .research-atlas button > svg:first-child {
+    display: none;
+  }
+  .assessment-route-visual {
+    gap: 6px;
+  }
+  .assessment-route-visual strong {
+    font-size: 11px;
+  }
+  .assessment-route-visual small {
+    font-size: 9px;
+  }
+  .continue-learning article {
+    flex-wrap: wrap;
+  }
+  .continue-learning article > .text-link {
+    margin-left: 55px;
+  }
+  .guide-provenance {
+    gap: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .research-response,
+  .research-live-label > span {
+    animation: none;
+  }
+}
+.source-chips a,
+.source-citation {
+  font-size: 11px !important;
+}
+.resource-action-row button {
+  font-size: 11px;
+}
+.continue-learning article small {
+  font-size: 11px;
+}
+.assessment-route-visual small {
+  font-size: 11px;
+}

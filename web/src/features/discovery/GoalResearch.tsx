@@ -11,9 +11,11 @@ import {
   GraduationCap,
   MapPin,
   Search,
+  Bookmark,
 } from "lucide-react";
 import { api } from "../../shared/api";
 import type { State } from "../../shared/types";
+import type { LearningPick } from "../learning/ContinueLearning";
 import ProcessingProgress from "../../shared/ui/ProcessingProgress";
 type Source = {
   id: string;
@@ -77,7 +79,14 @@ type Guide = {
   researched_at: string;
   notice: string;
 };
-type Job = { status: string; stage: string; result?: Guide; error?: string };
+type Job = {
+  source_count?: number;
+  source_preview?: { url: string; title: string }[];
+  status: string;
+  stage: string;
+  result?: Guide;
+  error?: string;
+};
 export default function GoalResearch({
   state,
   market,
@@ -96,9 +105,27 @@ export default function GoalResearch({
   query?: string;
 }) {
   const previousMarket = useRef(market);
+  const [picks, setPicks] = useState<LearningPick[]>([]),
+    [pickBusy, setPickBusy] = useState("");
+  function domain(url: string) {
+    try {
+      return new URL(url).hostname.replace(/^www\./, "");
+    } catch {
+      return "Original source";
+    }
+  }
+  function citation(url: string) {
+    const index =
+      guide?.sources.findIndex(
+        (source) => source.url.split("?")[0] === url.split("?")[0],
+      ) ?? -1;
+    return index >= 0 ? index + 1 : null;
+  }
+
   const goal = state?.profile.goal || "";
   const storageKey = `wetinnext-research:${market}:${goal}`;
   const [showImages, setShowImages] = useState(false);
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
   const [education, setEducation] = useState("not_shared"),
     [budget, setBudget] = useState("free_only");
   const [city, setCity] = useState(""),
@@ -199,6 +226,39 @@ export default function GoalResearch({
       clearTimeout(timer);
     };
   }, [jobId, storageKey]);
+  useEffect(() => {
+    let active = true;
+    setPicks([]);
+    if (goal)
+      api<LearningPick[]>(
+        `/me/learning-picks?market=${encodeURIComponent(market)}`,
+      )
+        .then((data) => {
+          if (active && Array.isArray(data)) setPicks(data);
+        })
+        .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [goal, market]);
+  async function savePick(source: Source) {
+    setPickBusy(source.id);
+    setError("");
+    try {
+      const pick = await api<LearningPick>("/me/learning-picks", {
+        method: "POST",
+        body: JSON.stringify({ research_id: jobId, resource_id: source.id }),
+      });
+      setPicks((items) => [
+        pick,
+        ...items.filter((item) => item.id !== pick.id),
+      ]);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setPickBusy("");
+    }
+  }
   const matches = (item: unknown) =>
     !query.trim() ||
     JSON.stringify(item).toLowerCase().includes(query.trim().toLowerCase());
@@ -390,7 +450,30 @@ export default function GoalResearch({
       )}
       {busy && (
         <div className="research-loading" role="status">
+          <span className="research-live-label">
+            <span />
+            Live research
+          </span>
           <h3>{job?.stage || "Starting your research"}</h3>
+          {!!job?.source_count && (
+            <>
+              <p>{job.source_count} source pages found · checking relevance</p>
+              <div className="source-chips">
+                {job.source_preview?.map((source) => (
+                  <a
+                    href={source.url}
+                    key={source.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <BookOpen size={12} />
+                    {domain(source.url)}
+                    <ArrowUpRight size={12} />
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
           <ProcessingProgress
             label="Researching your goal"
             detail="This can take a minute or two. You can leave this page and return."
@@ -409,7 +492,36 @@ export default function GoalResearch({
         </p>
       )}
       {guide && (
-        <div className="research-response" aria-live="polite">
+        <div className="research-response">
+          <div className="guide-provenance">
+            <span>
+              <Check size={13} />
+              Guide ready
+            </span>
+            <span>{guide.sources.length} linked sources</span>
+            <span>
+              Updated {new Date(guide.researched_at).toLocaleDateString()}
+            </span>
+          </div>
+          <div className="source-chips">
+            {Array.from(
+              new Map(
+                guide.sources.map((source) => [domain(source.url), source]),
+              ).values(),
+            )
+              .slice(0, 4)
+              .map((source) => (
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  key={source.url}
+                >
+                  {domain(source.url)}
+                  <ArrowUpRight size={12} />
+                </a>
+              ))}
+          </div>
           <div className="research-visual-control">
             {state?.profile.low_data !== false && (
               <button
@@ -503,7 +615,44 @@ export default function GoalResearch({
                       </a>
                     </h3>
                     <p>{source.why_it_fits}</p>
-                    <small>{source.access_note}</small>
+                    <div className="resource-action-row">
+                      <a
+                        className="source-citation"
+                        href={source.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {citation(source.url)
+                          ? `[${citation(source.url)}] `
+                          : ""}
+                        {domain(source.url)}
+                        <ArrowUpRight size={12} />
+                      </a>
+                      <button
+                        className="text-link"
+                        disabled={
+                          pickBusy === source.id ||
+                          picks.some((pick) => pick.url === source.url)
+                        }
+                        onClick={() => void savePick(source)}
+                      >
+                        {picks.some((pick) => pick.url === source.url) ? (
+                          <>
+                            <Check size={14} />
+                            Saved to Today
+                          </>
+                        ) : (
+                          <>
+                            <Bookmark size={14} />
+                            Save for later
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <details className="resource-access">
+                      <summary>Access & format</summary>
+                      <small>{source.access_note}</small>
+                    </details>
                   </div>
                 </article>
               ))}
@@ -540,6 +689,18 @@ export default function GoalResearch({
                             {place.kind} · {place.location}
                           </span>
                           <h3>{place.name}</h3>
+                          <a
+                            className="source-citation"
+                            href={place.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {citation(place.url)
+                              ? `[${citation(place.url)}] `
+                              : ""}
+                            {domain(place.url)}
+                            <ArrowUpRight size={12} />
+                          </a>
                           <p>{place.entry_route}</p>
                           <div className="research-place-links">
                             <a
@@ -630,7 +791,26 @@ export default function GoalResearch({
           )}
           {tab === "assess" && (
             <div className="research-exams">
-              <h3>Choose the right kind of assessment</h3>
+              <div className="assessment-route-visual">
+                <span>
+                  <BookOpen size={23} />
+                  <strong>Practise</strong>
+                  <small>Find what to revisit</small>
+                </span>
+                <ArrowRight size={18} />
+                <span>
+                  <Check size={23} />
+                  <strong>Keep evidence</strong>
+                  <small>Show your work</small>
+                </span>
+                <ArrowRight size={18} />
+                <span>
+                  <GraduationCap size={25} />
+                  <strong>Check eligibility</strong>
+                  <small>Confirm formal requirements</small>
+                </span>
+              </div>
+              <h3>Choose your next check</h3>
               <p>Find learning gaps, then check the formal requirements.</p>
               <a
                 className="text-link"
@@ -672,6 +852,19 @@ export default function GoalResearch({
           )}
           {tab === "plan" && (
             <div className="research-plan">
+              <div className="roadmap-ribbon">
+                {guide.weeks.map((week) => (
+                  <a
+                    key={week.week}
+                    href={`#guide-week-${week.week}`}
+                    onClick={() => setExpandedWeek(week.week)}
+                  >
+                    <span>{week.week}</span>
+                    <strong>{week.title}</strong>
+                    <small>{week.minutes} min</small>
+                  </a>
+                ))}
+              </div>
               <div className="research-plan-heading">
                 <div>
                   <span className="eyebrow">
@@ -730,7 +923,7 @@ export default function GoalResearch({
                     (r) => r.id === week.resource_id,
                   );
                   return (
-                    <li key={week.week}>
+                    <li id={`guide-week-${week.week}`} key={week.week}>
                       <span>{String(week.week).padStart(2, "0")}</span>
                       <div>
                         <small>
@@ -738,9 +931,16 @@ export default function GoalResearch({
                         </small>
                         <details
                           className="research-week-detail"
-                          open={week.week === 1}
+                          open={expandedWeek === week.week}
                         >
-                          <summary>
+                          <summary
+                            onClick={(event) => {
+                              event.preventDefault();
+                              setExpandedWeek((current) =>
+                                current === week.week ? null : week.week,
+                              );
+                            }}
+                          >
                             <h3>{week.title}</h3>
                           </summary>
                           <p>{week.task}</p>
@@ -807,9 +1007,15 @@ export default function GoalResearch({
               >
                 {(visible) => (
                   <ul>
-                    {visible.map((source, index) => (
+                    {visible.map((source) => (
                       <li key={source.url}>
-                        <span>{String(index + 1).padStart(2, "0")}</span>
+                        <span>
+                          {String(
+                            guide.sources.findIndex(
+                              (item) => item.url === source.url,
+                            ) + 1,
+                          ).padStart(2, "0")}
+                        </span>
                         <a href={source.url} target="_blank" rel="noreferrer">
                           <strong>{source.title}</strong>{" "}
                           <small>{new URL(source.url).hostname}</small>

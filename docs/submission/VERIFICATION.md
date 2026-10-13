@@ -37,8 +37,8 @@ The backend suites cover roles and identity, goal history, CV handling, source r
 
 The `.github/workflows/ci.yml` file defines automated checks for upload. A successful local run is not presented as a successful remote CI run. Final local verification after reorganization:
 
-- **110 backend tests passed.** One existing Starlette/httpx deprecation warning remains.
-- **27 frontend workflow tests passed.** jsdom reports its unsupported `scrollTo` method; route assertions still pass.
+- **111 backend tests passed.** One existing Starlette/httpx deprecation warning remains.
+- **30 frontend workflow tests passed.** jsdom reports its unsupported `scrollTo` method; route assertions still pass.
 - **Production build and Prettier formatting checks passed.**
 - **No missing local Markdown link targets.**
 - Frontend source imports and test mock paths were updated after feature-folder moves; five unused legacy components were removed.

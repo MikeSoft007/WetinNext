@@ -223,6 +223,7 @@ def delete_me(
         AssessmentAttempt,
         GoalWorkspace,
         GoalReminder,
+        LearningPick,
     )
 
     for model in [
@@ -234,6 +235,7 @@ def delete_me(
         AssessmentAttempt,
         GoalWorkspace,
         GoalReminder,
+        LearningPick,
     ]:
         session.execute(delete(model).where(model.learner_id == row.id))
     session.delete(row)

@@ -2516,6 +2516,163 @@
         ]
       }
     },
+    "/api/v1/me/learning-picks": {
+      "get": {
+        "tags": [
+          "Learning"
+        ],
+        "summary": "Learning Picks",
+        "operationId": "learning_picks_api_v1_me_learning_picks_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Nigeria",
+                "Rwanda",
+                "Global"
+              ],
+              "type": "string",
+              "default": "Nigeria",
+              "title": "Market"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Learning"
+        ],
+        "summary": "Learning Pick Save",
+        "operationId": "learning_pick_save_api_v1_me_learning_picks_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningPickRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/learning-picks/{pid}": {
+      "patch": {
+        "tags": [
+          "Learning"
+        ],
+        "summary": "Learning Pick Update",
+        "operationId": "learning_pick_update_api_v1_me_learning_picks__pid__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningPickUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/session": {
       "get": {
         "tags": [
@@ -2884,6 +3041,45 @@
           "metrics"
         ],
         "title": "LearnerState"
+      },
+      "LearningPickRequest": {
+        "properties": {
+          "research_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{32}$",
+            "title": "Research Id"
+          },
+          "resource_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Resource Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "research_id",
+          "resource_id"
+        ],
+        "title": "LearningPickRequest"
+      },
+      "LearningPickUpdate": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "saved",
+              "reading",
+              "read"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "LearningPickUpdate"
       },
       "Login": {
         "properties": {

@@ -292,3 +292,12 @@ class ReminderSettings(BaseModel):
         except (ZoneInfoNotFoundError, ValueError):
             raise ValueError("Choose a valid timezone.")
         return value
+
+
+class LearningPickRequest(BaseModel):
+    research_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+    resource_id: str = Field(min_length=1, max_length=100)
+
+
+class LearningPickUpdate(BaseModel):
+    status: Literal["saved", "reading", "read"]

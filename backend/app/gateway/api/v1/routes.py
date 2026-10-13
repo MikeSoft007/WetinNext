@@ -446,3 +446,27 @@ async def reminder_save(body: ReminderSettings, request: Request):
 @router.post("/me/reminders/acknowledge", tags=["Progress"])
 async def reminder_ack(request: Request):
     return await forward("learner", "/me/reminders/acknowledge", request, "POST")
+
+
+from app.contracts.schemas import LearningPickRequest, LearningPickUpdate
+
+
+@router.get("/me/learning-picks", tags=["Learning"])
+async def learning_picks(
+    request: Request, market: Literal["Nigeria", "Rwanda", "Global"] = "Nigeria"
+):
+    return await forward("learner", f"/me/learning-picks?market={market}", request)
+
+
+@router.post("/me/learning-picks", tags=["Learning"])
+async def learning_pick_save(body: LearningPickRequest, request: Request):
+    return await forward(
+        "learner", "/me/learning-picks", request, "POST", body.model_dump()
+    )
+
+
+@router.patch("/me/learning-picks/{pid}", tags=["Learning"])
+async def learning_pick_update(pid: str, body: LearningPickUpdate, request: Request):
+    return await forward(
+        "learner", f"/me/learning-picks/{pid}", request, "PATCH", body.model_dump()
+    )
