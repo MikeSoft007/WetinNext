@@ -1,0 +1,77 @@
+x-common: &common
+  build: ./backend
+  env_file:
+    - path: ./backend/.env
+      required: false
+  environment: &environment
+    DEMO_MODE: "true"
+    LEARNER_SERVICE_URL: http://learner:8000
+    CATALOG_SERVICE_URL: http://catalog:8000
+    MATCHING_SERVICE_URL: http://matching:8000
+  restart: unless-stopped
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "python",
+        "-c",
+        "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+      ]
+    interval: 10s
+    timeout: 3s
+    retries: 5
+
+services:
+  gateway:
+    <<: *common
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      learner: { condition: service_healthy }
+      catalog: { condition: service_healthy }
+      matching: { condition: service_healthy }
+  learner:
+    <<: *common
+    command:
+      [
+        "uvicorn",
+        "app.services.learners.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+      ]
+    environment:
+      <<: *environment
+      DATABASE_URL: sqlite:////data/wetinnext.db
+    volumes: ["learner-data:/data"]
+    depends_on:
+      catalog: { condition: service_healthy }
+  catalog:
+    <<: *common
+    command:
+      [
+        "uvicorn",
+        "app.services.catalog.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+      ]
+    environment:
+      <<: *environment
+      CATALOG_DATABASE: /data/catalog.db
+    volumes: ["catalog-data:/data"]
+  matching:
+    <<: *common
+    command:
+      [
+        "uvicorn",
+        "app.services.matching.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+      ]
+volumes:
+  learner-data:
+  catalog-data:

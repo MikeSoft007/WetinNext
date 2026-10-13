@@ -1,0 +1,3861 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WetinNext API Gateway",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/demo/session": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Demo Session",
+        "operationId": "demo_session_api_v1_demo_session_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "Learners"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_v1_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearnerState"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Learners"
+        ],
+        "summary": "Delete",
+        "operationId": "delete_api_v1_me_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Delete Api V1 Me Delete"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/profile": {
+      "put": {
+        "tags": [
+          "Learners"
+        ],
+        "summary": "Profile",
+        "operationId": "profile_api_v1_me_profile_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Profile Api V1 Me Profile Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Pathways"
+        ],
+        "summary": "Adjust",
+        "description": "Adjust hours/device and future work while retaining completed tasks.",
+        "operationId": "adjust_api_v1_me_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileAdjustment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Adjust Api V1 Me Profile Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/weeks/{week}/check-in": {
+      "post": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "Check In",
+        "operationId": "check_in_api_v1_weeks__week__check_in_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "week",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Week"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Check In Api V1 Weeks  Week  Check In Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/check-ins": {
+      "get": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "History",
+        "operationId": "history_api_v1_check_ins_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response History Api V1 Check Ins Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/resources": {
+      "get": {
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "Resources",
+        "operationId": "resources_api_v1_resources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Resource"
+                  },
+                  "type": "array",
+                  "title": "Response Resources Api V1 Resources Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/opportunities": {
+      "get": {
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "Opportunities",
+        "operationId": "opportunities_api_v1_opportunities_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Opportunity"
+                  },
+                  "title": "Response Opportunities Api V1 Opportunities Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/opportunities/{oid}": {
+      "get": {
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "Opportunity",
+        "operationId": "opportunity_api_v1_opportunities__oid__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "oid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Oid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/opportunities/{oid}/assessment": {
+      "get": {
+        "tags": [
+          "Matching"
+        ],
+        "summary": "Assessment",
+        "operationId": "assessment_api_v1_opportunities__oid__assessment_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "oid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Oid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchingAssessment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{oid}": {
+      "put": {
+        "tags": [
+          "Applications"
+        ],
+        "summary": "Applications",
+        "operationId": "applications_api_v1_applications__oid__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "oid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Oid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Applications Api V1 Applications  Oid  Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/learners": {
+      "get": {
+        "tags": [
+          "Administration"
+        ],
+        "summary": "Admin Learners",
+        "operationId": "admin_learners_api_v1_admin_learners_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/audit": {
+      "get": {
+        "tags": [
+          "Administration"
+        ],
+        "summary": "Admin Audit",
+        "operationId": "admin_audit_api_v1_admin_audit_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content/{kind}": {
+      "get": {
+        "tags": [
+          "Administration"
+        ],
+        "summary": "Admin Content",
+        "operationId": "admin_content_api_v1_admin_content__kind__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "resources",
+                "opportunities"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content/{kind}/{item_id}": {
+      "put": {
+        "tags": [
+          "Administration"
+        ],
+        "summary": "Admin Save",
+        "operationId": "admin_save_api_v1_admin_content__kind___item_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "resources",
+                "opportunities"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/cv-reviews": {
+      "get": {
+        "tags": [
+          "CV reviews"
+        ],
+        "summary": "Cv History",
+        "operationId": "cv_history_api_v1_me_cv_reviews_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 6,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CV reviews"
+        ],
+        "summary": "Cv Upload",
+        "operationId": "cv_upload_api_v1_me_cv_reviews_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CVUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/cv-reviews/{review_id}": {
+      "delete": {
+        "tags": [
+          "CV reviews"
+        ],
+        "summary": "Cv Delete",
+        "operationId": "cv_delete_api_v1_me_cv_reviews__review_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Review Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sources": {
+      "get": {
+        "tags": [
+          "Source ingestion"
+        ],
+        "summary": "Sources",
+        "operationId": "sources_api_v1_admin_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sources/{provider}/sync": {
+      "post": {
+        "tags": [
+          "Source ingestion"
+        ],
+        "summary": "Source Sync",
+        "operationId": "source_sync_api_v1_admin_sources__provider__sync_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "jobicy",
+                "freecodecamp",
+                "remotive",
+                "reliefweb",
+                "hec"
+              ],
+              "type": "string",
+              "title": "Provider"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations": {
+      "get": {
+        "tags": [
+          "Matching"
+        ],
+        "summary": "Recommendations",
+        "operationId": "recommendations_api_v1_recommendations_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Nigeria",
+                    "Rwanda",
+                    "Global"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/source-settings": {
+      "get": {
+        "summary": "Automatic Settings",
+        "operationId": "automatic_settings_api_v1_admin_source_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Automatic Update",
+        "operationId": "automatic_update_api_v1_admin_source_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/applications": {
+      "get": {
+        "tags": [
+          "Applications"
+        ],
+        "summary": "Application List",
+        "operationId": "application_list_api_v1_applications_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/preparation/{oid}": {
+      "get": {
+        "tags": [
+          "Applications"
+        ],
+        "summary": "Preparation Get",
+        "operationId": "preparation_get_api_v1_preparation__oid__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "oid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Oid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Applications"
+        ],
+        "summary": "Preparation Put",
+        "operationId": "preparation_put_api_v1_preparation__oid__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "oid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Oid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreparationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/regional-sources": {
+      "get": {
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "Regional Sources",
+        "operationId": "regional_sources_api_v1_regional_sources_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search",
+        "operationId": "search_api_v1_search_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "resources",
+                "opportunities"
+              ],
+              "type": "string",
+              "default": "opportunities",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Nigeria",
+                    "Rwanda",
+                    "Global"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100000,
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 6,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "live_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Live Only"
+            }
+          },
+          {
+            "name": "low_data_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Low Data Only"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Admin Search",
+        "operationId": "admin_search_api_v1_admin_search_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "resources",
+                "opportunities"
+              ],
+              "type": "string",
+              "default": "opportunities",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Nigeria",
+                    "Rwanda",
+                    "Global"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "published",
+                "draft",
+                "archived"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100000,
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/weeks/{week}/work": {
+      "get": {
+        "tags": [
+          "Weekly work"
+        ],
+        "summary": "Week Work",
+        "operationId": "week_work_api_v1_weeks__week__work_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "week",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Week"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Weekly work"
+        ],
+        "summary": "Save Week Work",
+        "operationId": "save_week_work_api_v1_weeks__week__work_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "week",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Week"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/portfolio": {
+      "get": {
+        "tags": [
+          "Weekly work"
+        ],
+        "summary": "Portfolio",
+        "operationId": "portfolio_api_v1_me_portfolio_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/external-job-review": {
+      "post": {
+        "tags": [
+          "Matching"
+        ],
+        "summary": "External Job Review",
+        "operationId": "external_job_review_api_v1_me_external_job_review_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalJob"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/research": {
+      "post": {
+        "tags": [
+          "Goal research"
+        ],
+        "summary": "Research Start",
+        "operationId": "research_start_api_v1_research_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/research/{research_id}": {
+      "get": {
+        "tags": [
+          "Goal research"
+        ],
+        "summary": "Research Status",
+        "operationId": "research_status_api_v1_research__research_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "research_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Research Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/research-plan": {
+      "post": {
+        "tags": [
+          "Pathways"
+        ],
+        "summary": "Research Adopt",
+        "operationId": "research_adopt_api_v1_me_research_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResearchAdoption"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/research": {
+      "get": {
+        "tags": [
+          "Goal research"
+        ],
+        "summary": "Latest Research",
+        "operationId": "latest_research_api_v1_me_research_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Nigeria",
+                "Rwanda",
+                "Global"
+              ],
+              "type": "string",
+              "default": "Nigeria",
+              "title": "Market"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/goal": {
+      "put": {
+        "tags": [
+          "Learners"
+        ],
+        "summary": "Change Goal",
+        "operationId": "change_goal_api_v1_me_goal_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/readiness": {
+      "get": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Readiness",
+        "operationId": "readiness_api_v1_me_readiness_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/assessment": {
+      "get": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Assessment Get",
+        "operationId": "assessment_get_api_v1_me_assessment_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Assessment Create",
+        "operationId": "assessment_create_api_v1_me_assessment_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizSettings",
+                "default": {
+                  "time_limit_minutes": 0,
+                  "question_count": 4,
+                  "difficulty": "beginner"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/assessment/{attempt_id}/submit": {
+      "post": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Assessment Submit",
+        "operationId": "assessment_submit_api_v1_me_assessment__attempt_id__submit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizAnswer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/goals": {
+      "get": {
+        "tags": [
+          "Goals"
+        ],
+        "summary": "Goals",
+        "operationId": "goals_api_v1_me_goals_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/goals/{goal_id}/activate": {
+      "post": {
+        "tags": [
+          "Goals"
+        ],
+        "summary": "Goal Activate",
+        "operationId": "goal_activate_api_v1_me_goals__goal_id__activate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "goal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Goal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/skills": {
+      "get": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Goal Skills",
+        "operationId": "goal_skills_api_v1_me_skills_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/preparation": {
+      "get": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Preparation",
+        "operationId": "preparation_api_v1_me_preparation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/reminders": {
+      "get": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Reminder Read",
+        "operationId": "reminder_read_api_v1_me_reminders_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Reminder Save",
+        "operationId": "reminder_save_api_v1_me_reminders_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReminderSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/reminders/acknowledge": {
+      "post": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Reminder Ack",
+        "operationId": "reminder_ack_api_v1_me_reminders_acknowledge_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/session": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Session",
+        "operationId": "session_api_v1_auth_session_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sign-in": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Sign In",
+        "operationId": "sign_in_api_v1_auth_sign_in_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sign-out": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Sign Out",
+        "operationId": "sign_out_api_v1_auth_sign_out_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/admin-demo": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Admin Demo",
+        "description": "Local preview role permits inspection only, never administrative writes.",
+        "operationId": "admin_demo_api_v1_auth_admin_demo_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/demo-accounts": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Demo Accounts",
+        "operationId": "demo_accounts_api_v1_auth_demo_accounts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIWeek": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "title": "Week"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "task": {
+            "type": "string",
+            "title": "Task"
+          },
+          "success": {
+            "type": "string",
+            "title": "Success"
+          },
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "Minutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "title",
+          "task",
+          "success",
+          "resource_id",
+          "minutes"
+        ],
+        "title": "AIWeek"
+      },
+      "ApplicationUpdate": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "interested",
+              "preparing",
+              "applied",
+              "interviewing",
+              "offer",
+              "rejected",
+              "closed",
+              "withdrawn"
+            ],
+            "title": "Status"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ApplicationUpdate"
+      },
+      "CVUpload": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Filename"
+          },
+          "content_base64": {
+            "type": "string",
+            "maxLength": 7000000,
+            "title": "Content Base64"
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Goal",
+            "default": ""
+          },
+          "opportunity_id": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Opportunity Id",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "content_base64"
+        ],
+        "title": "CVUpload"
+      },
+      "CheckIn": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "stuck",
+              "more-time"
+            ],
+            "title": "Status"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "CheckIn"
+      },
+      "ContentEdit": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ],
+            "title": "Status",
+            "default": "draft"
+          },
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ContentEdit"
+      },
+      "ExternalJob": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Url"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 20000,
+            "minLength": 80,
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "description"
+        ],
+        "title": "ExternalJob"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LearnerState": {
+        "properties": {
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
+          "needs_goal_research": {
+            "type": "boolean",
+            "title": "Needs Goal Research",
+            "default": false
+          },
+          "profile": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Profile"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pathway"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Progress"
+          },
+          "applications": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Applications"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profile",
+          "plan",
+          "progress",
+          "applications",
+          "metrics"
+        ],
+        "title": "LearnerState"
+      },
+      "Login": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "Login"
+      },
+      "MatchingAssessment": {
+        "properties": {
+          "engine": {
+            "type": "string",
+            "title": "Engine",
+            "default": "rule-based fallback"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "fallback_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback Reason"
+          },
+          "cached": {
+            "type": "boolean",
+            "title": "Cached",
+            "default": false
+          },
+          "learning_resources": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Learning Resources"
+          },
+          "minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minutes"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "sample": {
+            "type": "boolean",
+            "title": "Sample"
+          },
+          "supported": {
+            "items": {
+              "$ref": "#/components/schemas/SupportedRequirement"
+            },
+            "type": "array",
+            "title": "Supported"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/SkillGap"
+            },
+            "type": "array",
+            "title": "Gaps"
+          },
+          "strength": {
+            "type": "string",
+            "title": "Strength"
+          },
+          "gap": {
+            "type": "string",
+            "title": "Gap"
+          },
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "deadline_notice": {
+            "type": "string",
+            "title": "Deadline Notice"
+          },
+          "honest_guide": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Honest Guide"
+          },
+          "notice": {
+            "type": "string",
+            "title": "Notice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "sample",
+          "supported",
+          "gaps",
+          "strength",
+          "gap",
+          "actions",
+          "deadline",
+          "deadline_notice",
+          "honest_guide",
+          "notice"
+        ],
+        "title": "MatchingAssessment"
+      },
+      "Opportunity": {
+        "properties": {
+          "source_text": {
+            "type": "string",
+            "maxLength": 7000,
+            "title": "Source Text",
+            "default": ""
+          },
+          "source_changed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Changed At"
+          },
+          "source_changed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Source Changed Fields"
+          },
+          "availability": {
+            "type": "string",
+            "title": "Availability",
+            "default": "unknown"
+          },
+          "last_checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Checked At"
+          },
+          "source_seen_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Seen At"
+          },
+          "last_check_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Check Result"
+          },
+          "source_snapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Snapshot"
+          },
+          "missing_checks": {
+            "type": "integer",
+            "title": "Missing Checks",
+            "default": 0
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
+          "geography": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geography"
+          },
+          "seniority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seniority"
+          },
+          "deadline_unknown_confirmed": {
+            "type": "boolean",
+            "title": "Deadline Unknown Confirmed",
+            "default": false
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "organisation": {
+            "type": "string",
+            "title": "Organisation"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "mandatory": {
+            "type": "string",
+            "title": "Mandatory"
+          },
+          "sample": {
+            "type": "boolean",
+            "title": "Sample"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "organisation",
+          "type",
+          "country",
+          "skills",
+          "description",
+          "mandatory",
+          "sample",
+          "url",
+          "deadline"
+        ],
+        "title": "Opportunity"
+      },
+      "Pathway": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/AIWeek"
+            },
+            "type": "array",
+            "title": "Weeks"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/Resource"
+            },
+            "type": "array",
+            "title": "Resources"
+          },
+          "research_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Research Id"
+          },
+          "research_guide": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Research Guide"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "engine": {
+            "type": "string",
+            "title": "Engine"
+          },
+          "notice": {
+            "type": "string",
+            "title": "Notice"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "outcome",
+          "weeks",
+          "engine",
+          "notice"
+        ],
+        "title": "Pathway"
+      },
+      "PreparationUpdate": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "maxLength": 700,
+            "minLength": 1,
+            "title": "Action"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "completed"
+        ],
+        "title": "PreparationUpdate"
+      },
+      "Profile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "learner_type": {
+            "type": "string",
+            "enum": [
+              "student",
+              "self-taught",
+              "both"
+            ],
+            "title": "Learner Type",
+            "default": "student"
+          },
+          "country": {
+            "type": "string",
+            "enum": [
+              "Nigeria",
+              "Rwanda",
+              "Other"
+            ],
+            "title": "Country",
+            "default": "Nigeria"
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Goal"
+          },
+          "hours": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Hours"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "laptop",
+              "phone"
+            ],
+            "title": "Device",
+            "default": "laptop"
+          },
+          "background": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Background",
+            "default": ""
+          },
+          "low_data": {
+            "type": "boolean",
+            "title": "Low Data",
+            "default": true
+          },
+          "career_track": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "infrastructure",
+              "data",
+              "frontend",
+              "backend",
+              "cybersecurity",
+              "marketing",
+              "support",
+              "project",
+              "scholarship",
+              "foundation"
+            ],
+            "title": "Career Track",
+            "default": "auto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "goal",
+          "hours"
+        ],
+        "title": "Profile"
+      },
+      "ProfileAdjustment": {
+        "properties": {
+          "hours": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Hours"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "laptop",
+              "phone"
+            ],
+            "title": "Device"
+          },
+          "low_data": {
+            "type": "boolean",
+            "title": "Low Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hours",
+          "device",
+          "low_data"
+        ],
+        "title": "ProfileAdjustment"
+      },
+      "QuizAnswer": {
+        "properties": {
+          "answers": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answers"
+        ],
+        "title": "QuizAnswer"
+      },
+      "QuizSettings": {
+        "properties": {
+          "time_limit_minutes": {
+            "type": "integer",
+            "maximum": 60.0,
+            "minimum": 0.0,
+            "title": "Time Limit Minutes",
+            "default": 0
+          },
+          "question_count": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Question Count",
+            "default": 4
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty",
+            "default": "beginner"
+          }
+        },
+        "type": "object",
+        "title": "QuizSettings"
+      },
+      "ReminderSettings": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": false
+          },
+          "days": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Days"
+          },
+          "time": {
+            "type": "string",
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "title": "Time",
+            "default": "18:00"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "Africa/Kigali"
+          },
+          "focus": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Focus",
+            "default": "weekly practice"
+          }
+        },
+        "type": "object",
+        "title": "ReminderSettings"
+      },
+      "ResearchAdoption": {
+        "properties": {
+          "research_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{32}$",
+            "title": "Research Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "research_id"
+        ],
+        "title": "ResearchAdoption"
+      },
+      "ResearchRequest": {
+        "properties": {
+          "refresh": {
+            "type": "boolean",
+            "title": "Refresh",
+            "default": false
+          },
+          "education": {
+            "type": "string",
+            "enum": [
+              "not_shared",
+              "secondary",
+              "diploma",
+              "degree"
+            ],
+            "title": "Education",
+            "default": "not_shared"
+          },
+          "budget": {
+            "type": "string",
+            "enum": [
+              "free_only",
+              "affordable",
+              "flexible"
+            ],
+            "title": "Budget",
+            "default": "free_only"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "City",
+            "default": ""
+          },
+          "market": {
+            "type": "string",
+            "enum": [
+              "Nigeria",
+              "Rwanda",
+              "Global"
+            ],
+            "title": "Market",
+            "default": "Nigeria"
+          }
+        },
+        "type": "object",
+        "title": "ResearchRequest"
+      },
+      "Resource": {
+        "properties": {
+          "data_usage": {
+            "type": "string",
+            "title": "Data Usage",
+            "default": "unknown"
+          },
+          "low_data_suitable": {
+            "type": "boolean",
+            "title": "Low Data Suitable",
+            "default": false
+          },
+          "data_note": {
+            "type": "string",
+            "title": "Data Note",
+            "default": "Data use is unverified."
+          },
+          "learning_outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Learning Outcomes"
+          },
+          "sample_exercise": {
+            "type": "string",
+            "title": "Sample Exercise",
+            "default": ""
+          },
+          "suggested_session_minutes": {
+            "type": "integer",
+            "title": "Suggested Session Minutes",
+            "default": 20
+          },
+          "prerequisites": {
+            "type": "string",
+            "title": "Prerequisites",
+            "default": "Check provider requirements."
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device"
+          },
+          "cost": {
+            "type": "string",
+            "title": "Cost"
+          },
+          "review": {
+            "type": "string",
+            "title": "Review"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "provider",
+          "url",
+          "format",
+          "device",
+          "cost",
+          "review"
+        ],
+        "title": "Resource"
+      },
+      "SkillGap": {
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "title": "Requirement"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirement",
+          "reason"
+        ],
+        "title": "SkillGap"
+      },
+      "SupportedRequirement": {
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "title": "Requirement"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirement",
+          "evidence"
+        ],
+        "title": "SupportedRequirement"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WorkUpdate": {
+        "properties": {
+          "checklist": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "maxProperties": 3,
+            "title": "Checklist"
+          },
+          "evidence_url": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Evidence Url",
+            "default": ""
+          },
+          "reflection": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Reflection",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "WorkUpdate"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "APIKeyCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "wetinnext_demo"
+      }
+    }
+  }
+}
