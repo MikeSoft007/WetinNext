@@ -539,3 +539,8 @@ async def training_routes(
         "/training-routes?" + urlencode({"goal": goal, "market": market}),
         request,
     )
+
+
+@router.delete("/me/goals/{goal_id}", tags=["Goals"])
+async def goal_delete(goal_id: str, request: Request):
+    return await forward("learner", f"/me/goals/{goal_id}", request, "DELETE")

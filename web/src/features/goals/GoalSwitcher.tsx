@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Plus, ArrowRight } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Plus, ArrowRight, Trash2, X, Target } from "lucide-react";
 import { api } from "../../shared/api";
 import type { State } from "../../shared/types";
 type Goal = {
@@ -42,6 +42,28 @@ export default function GoalSwitcher({
       active = false;
     };
   }, [state]);
+  const [managing, setManaging] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (managing) dialog.current?.showModal();
+    else dialog.current?.close();
+  }, [managing]);
+  const [deleting, setDeleting] = useState<Goal | null>(null);
+  async function removeGoal() {
+    if (!deleting) return;
+    setBusy(true);
+    setError("");
+    try {
+      await api(`/me/goals/${deleting.id}`, { method: "DELETE" });
+      setDeleting(null);
+      await onSwitched();
+      setGoals(await api<Goal[]>("/me/goals"));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function activate(id: string) {
     setBusy(true);
     setError("");
@@ -87,31 +109,154 @@ export default function GoalSwitcher({
         <Plus size={15} />
         Add a goal
       </button>
-      {goals.length > 1 && (
-        <details>
-          <summary>{goals.length} goals · History</summary>
-          <div className="goal-history">
-            {goals.map((goal) => (
-              <button
-                key={goal.id}
-                disabled={busy || goal.active}
-                onClick={() => void activate(goal.id)}
-              >
-                <span>
-                  <strong>{goal.goal}</strong>
-                  <small>
-                    {goal.has_plan
-                      ? `${goal.completed_weeks}/4 weeks complete`
-                      : "Plan not started"}{" "}
-                    · {goal.country}
-                  </small>
-                </span>
-                <span>{goal.active ? "Active" : <ArrowRight size={15} />}</span>
-              </button>
-            ))}
-          </div>
-        </details>
+      {goals.length > 0 && (
+        <button
+          className="secondary"
+          onClick={() => {
+            setDeleting(null);
+            setManaging(true);
+          }}
+        >
+          Manage goals · {goals.length}
+        </button>
       )}
+      <dialog
+        ref={dialog}
+        className="goal-manager"
+        aria-labelledby="goal-manager-title"
+        onCancel={(e) => {
+          if (busy) e.preventDefault();
+          else {
+            setManaging(false);
+            setDeleting(null);
+          }
+        }}
+      >
+        <header>
+          <div>
+            <span className="public-eyebrow">YOUR DIRECTIONS</span>
+            <h2 id="goal-manager-title">
+              {deleting ? "Delete this goal?" : "My goals"}
+            </h2>
+          </div>
+          <button
+            aria-label="Close goal manager"
+            disabled={busy}
+            onClick={() => {
+              setManaging(false);
+              setDeleting(null);
+            }}
+          >
+            <X size={20} />
+          </button>
+        </header>
+        {deleting ? (
+          <section
+            className="goal-manager-confirm"
+            role="alertdialog"
+            aria-label="Confirm goal deletion"
+          >
+            <div className="goal-to-delete">
+              <Target size={20} />
+              <strong>{deleting.goal}</strong>
+            </div>
+            <p>
+              Its plan, saved work, practice attempts and learning picks will be
+              removed. This cannot be undone.
+            </p>
+            <p className="privacy-note">
+              Your profile, other goals and uploaded CV reviews remain.
+            </p>
+            {deleting.active && (
+              <p className="privacy-note">
+                {goals.length > 1
+                  ? "Your most recently used remaining goal will become active."
+                  : "You can choose a new goal after deleting this one."}
+              </p>
+            )}
+            {error && <p role="alert">{error}</p>}
+            <footer>
+              <button
+                className="secondary"
+                disabled={busy}
+                onClick={() => setDeleting(null)}
+              >
+                Keep goal
+              </button>
+              <button
+                className="goal-danger"
+                disabled={busy}
+                onClick={() => void removeGoal()}
+              >
+                <Trash2 size={15} />
+                {busy ? "Deleting…" : "Delete goal"}
+              </button>
+            </footer>
+          </section>
+        ) : (
+          <>
+            <p className="privacy-note">
+              Switch your focus or remove a goal you no longer need.
+            </p>
+            <div className="goal-manager-list">
+              {goals.map((goal) => (
+                <div key={goal.id} className="goal-manager-row">
+                  <div className="goal-manager-icon">
+                    <Target size={19} />
+                  </div>
+                  <div className="goal-manager-info">
+                    <strong>{goal.goal}</strong>
+                    <small>
+                      {goal.has_plan
+                        ? `${goal.completed_weeks} weeks complete`
+                        : "Plan not started"}{" "}
+                      · {goal.country}
+                    </small>
+                  </div>
+                  {goal.active ? (
+                    <span className="goal-active-label">Current</span>
+                  ) : (
+                    <button
+                      disabled={busy}
+                      className="goal-switch-action"
+                      onClick={async () => {
+                        await activate(goal.id);
+                        setManaging(false);
+                      }}
+                    >
+                      Switch <ArrowRight size={14} />
+                    </button>
+                  )}
+                  <button
+                    className="goal-remove-action"
+                    aria-label={`Delete goal: ${goal.goal}`}
+                    disabled={busy}
+                    onClick={() => {
+                      setError("");
+                      setDeleting(goal);
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <footer>
+              <button
+                className="secondary"
+                disabled={busy}
+                onClick={() => {
+                  setManaging(false);
+                  onAdd();
+                }}
+              >
+                <Plus size={15} />
+                Add another goal
+              </button>
+            </footer>
+          </>
+        )}
+      </dialog>
       {error && <p role="alert">{error}</p>}
     </div>
   );

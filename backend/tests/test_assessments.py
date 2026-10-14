@@ -451,6 +451,7 @@ def test_quiz_repairs_resource_id_for_verified_lesson(clients, monkeypatch):
     _, _, settings, _ = clients
     settings.openai_api_key = "mock"
     settings.openai_model = "mock"
+    seen = {}
 
     class WrongResourceAI:
         def __init__(self, **kwargs):
@@ -466,6 +467,8 @@ def test_quiz_repairs_resource_id_for_verified_lesson(clients, monkeypatch):
             return lesson_response()
 
         async def parse(self, **kwargs):
+            seen["schema"] = kwargs["text_format"].model_json_schema()
+            seen["input"] = json.loads(kwargs["input"])
             return SimpleNamespace(
                 output_parsed=quizzes.Quiz(
                     title="Practice",
@@ -505,3 +508,6 @@ def test_quiz_repairs_resource_id_for_verified_lesson(clients, monkeypatch):
     assert (
         result["questions"][0]["source_url"] == "https://example.edu/anatomy/lesson"
     )
+    source_schema = seen["schema"]["$defs"]["VerifiedSourceUrl"]
+    assert source_schema["enum"] == ["https://example.edu/anatomy/lesson"]
+    assert "resources" not in seen["input"]

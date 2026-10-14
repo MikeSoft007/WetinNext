@@ -135,6 +135,9 @@ test("live research goes from city to sourced learning, schools/map and saved pl
       name: "Learn & schools · 2",
     }),
   ).toBeTruthy();
+  await user.click(
+    screen.getByRole("button", { name: "Schools & training · 1" }),
+  );
   expect(
     screen.getByRole("heading", { name: "Example Nursing School" }),
   ).toBeTruthy();
@@ -241,7 +244,11 @@ test("sources are paginated six per page", async () => {
   await user.click(screen.getByText("Sources & important details"));
   expect(screen.getByRole("link", { name: /^Reference 1\b/ })).toBeTruthy();
   expect(screen.queryByRole("link", { name: /^Reference 7\b/ })).toBeNull();
-  await user.click(screen.getByRole("button", { name: "Next page" }));
+  await user.click(
+    screen
+      .getAllByRole("button", { name: "Next page" })
+      .find((button) => !(button as HTMLButtonElement).disabled)!,
+  );
   expect(screen.getByRole("link", { name: /Reference 7/ })).toBeTruthy();
 });
 

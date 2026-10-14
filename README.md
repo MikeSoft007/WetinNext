@@ -148,6 +148,12 @@ npm --prefix web run format:check
 
 [Verification notes](docs/submission/VERIFICATION.md) distinguish automated tests, live AI checks and pending visual/deployment checks. The GitHub Actions workflow defines these checks; no remote CI run is claimed before upload.
 
+## What comes next
+
+- **A robust learning library:** expand the searchable collection of credible courses, ebooks, open textbooks, library collections and training providers. Organize resources by career goal, skill, level, location and free or paid access so learners can find what supports their next step.
+- **Continuously refreshed opportunity listings:** develop regular source refresh and availability checks for jobs, internships, scholarships and admissions, with application links, deadlines and goal-based preparation guidance. The aim is timely, relevant listings that help learners progress towards their goals. Current web research is on demand; a comprehensive real-time listing service is future work.
+- **Phone-based continuity through Telegram:** enable learners to receive next actions, record check-ins and stay engaged from their phones.
+
 ## Proof-of-concept boundaries
 
 English-first; Nigerian Pidgin, French and other languages are future work. Maps show regional context, not verified institution pins. Reminders are in-app, not background email/push. Telegram is a future phone-based check-in and guidance feature. Its polling adapter is a scaffold; live account linking and delivery are not yet implemented or verified. LinkedIn support is a goal-specific search/review bridge, not a scraping or bulk-ingestion integration. Research and quizzes require available model access; AI-generated practice is not a validated exam. See the [full reviewer guide](docs/README.md) for details.
