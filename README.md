@@ -6,6 +6,18 @@ WetinNext is a working proof of concept for university students and self-taught 
 
 The project concept and learner requirements came from the project owner. Codex was used to implement, debug, test and refine the solution.
 
+## Built with Codex
+
+The project owner defined WetinNext's idea, learner needs and product direction. **Codex helped turn that direction into a working, tested proof of concept**, through implementation, debugging and repeated refinement from real feedback.
+
+- **Goal-specific AI discovery:** implemented web-grounded research, traceable provider links and bounded follow-up searches when schools or opportunities were missing. Feedback about unrelated recommendations led to stronger goal and location handling. See [research implementation](backend/app/services/matching/research.py) and [research regressions](backend/tests/test_web_research.py).
+- **A connected learner journey:** consolidated Discover, Progress and Review; built weekly topic reviews, saved work evidence, learning extensions and application comparisons. See [learner workspace](web/src/features/learner/LearnerWorkspace.tsx).
+- **Persistent, personal progress:** added multiple-goal history, consistent profile identity and durable research restoration, then investigated failures through API checks and regression tests.
+- **Practical verification:** ran synthetic end-to-end API rehearsals and live model searches, and added automated checks for material behavior. The latest full local run passed **127 backend tests and 45 frontend tests**, alongside the production build and formatting checks.
+- **Reviewable delivery:** organized feature folders, maintained API documentation and prepared pull requests with CI checks. Codex also documented limitations instead of presenting source citations, quiz scores or CV mentions as verified career readiness.
+
+See [Codex usage and engineering examples](docs/submission/CODEX_USAGE.md) and [verification boundaries](docs/submission/VERIFICATION.md). The concept is the owner's; the implementation collaboration and its evidence are inspectable in this repository.
+
 ## Project documentation
 
 - [Architecture and service boundaries](docs/architecture/README.md)
