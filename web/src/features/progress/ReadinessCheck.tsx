@@ -345,26 +345,28 @@ export default function ReadinessCheck({
             </span>
             <span>{minutes ? `${minutes} minutes` : "No timer"}</span>
           </div>
-          <button
-            className="primary"
-            disabled={!Number.isInteger(count) || count < 1 || count > 20}
-            onClick={() =>
-              state?.plan?.research_id
-                ? void start()
-                : navigateApp("/app/discover?view=plan")
-            }
-          >
-            <ClipboardCheck size={16} />
-            {state?.plan?.research_id
-              ? `Start ${Number.isFinite(count) ? count : ""}-question practice`
-              : "Build my researched plan"}
-            <ArrowRight size={15} />
-          </button>
-          {attempt && (
-            <button className="text-link" onClick={() => setConfigure(false)}>
-              Return to my current set
+          <div className="quiz-setup-actions">
+            <button
+              className="primary"
+              disabled={!Number.isInteger(count) || count < 1 || count > 20}
+              onClick={() =>
+                state?.plan?.research_id
+                  ? void start()
+                  : navigateApp("/app/discover?view=plan")
+              }
+            >
+              <ClipboardCheck size={16} />
+              {state?.plan?.research_id
+                ? `Start ${Number.isFinite(count) ? count : ""}-question practice`
+                : "Build my researched plan"}
+              <ArrowRight size={15} />
             </button>
-          )}
+            {attempt && (
+              <button className="text-link" onClick={() => setConfigure(false)}>
+                Return to my current set
+              </button>
+            )}
+          </div>
           {!state?.plan?.research_id && (
             <p className="privacy-note">
               A researched plan keeps practice questions grounded in your chosen
