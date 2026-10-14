@@ -2,12 +2,10 @@
 
 Use the root README and `submission/` as the current reviewer entry points. `guides/` contains implementation notes accumulated during development; dated historical statements there describe their own milestone. `archive/` is development history, not the current feature checklist.
 
-## Submission
+## Project evidence
 
-- [Rubric alignment](submission/RUBRIC.md)
 - [Geographic scalability](submission/SCALABILITY.md)
 - [Codex contribution](submission/CODEX_USAGE.md)
-- [Demonstration script](submission/DEMO.md)
 - [Verification and limits](submission/VERIFICATION.md)
 
 ## Engineering

@@ -6,16 +6,14 @@ WetinNext is a working proof of concept for university students and self-taught 
 
 The project concept and learner requirements came from the project owner. Codex was used to implement, debug, test and refine the solution.
 
-## Start here for grading
+## Project documentation
 
-| Rubric | Weight | Review evidence |
-| --- | --- | --- |
-| Uniqueness | 25% | [Problem, approach and differentiators](docs/submission/RUBRIC.md#uniqueness-25) |
-| Scalability | 25% | [Geographic expansion and current limits](docs/submission/SCALABILITY.md) |
-| Codex usage | 25% | [Engineering workflow and concrete examples](docs/submission/CODEX_USAGE.md) |
-| Presentation | 25% | [Five-minute demonstration](docs/submission/DEMO.md) and [verification](docs/submission/VERIFICATION.md) |
+- [Architecture and service boundaries](docs/architecture/README.md)
+- [Geographic expansion and current limits](docs/submission/SCALABILITY.md)
+- [Codex engineering contribution](docs/submission/CODEX_USAGE.md)
+- [Verification and limitations](docs/submission/VERIFICATION.md)
 
-**Reviewer route:** read the rubric map → run the app → sign in to a seeded learner → follow the demo → inspect the feature folders and tests. Older milestone documents are clearly separated in `docs/archive/`.
+Start with the setup instructions below, then explore Discover, Progress and Review using a seeded learner account. Feature folders and tests document the implementation; `docs/archive/` contains older milestone notes.
 
 ## What works
 
