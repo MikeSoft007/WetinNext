@@ -47,3 +47,15 @@ app.include_router(skills_router, prefix="/api/v1")
 from .preparation import router as preparation_router
 
 app.include_router(preparation_router, prefix="/api/v1")
+
+from .learning_picks import router as learning_picks_router
+
+app.include_router(learning_picks_router, prefix="/api/v1")
+
+from .branches import router as branches_router
+
+app.include_router(branches_router, prefix="/api/v1")
+
+from .journey import router as journey_router
+
+app.include_router(journey_router, prefix="/api/v1")

@@ -71,6 +71,17 @@ test("practice is submitted to server and never labelled qualified", async () =>
   await user.click(
     screen.getByRole("button", { name: /Start 4-question practice/ }),
   );
+  await user.click(
+    await screen.findByRole("button", { name: "Mark for review" }),
+  );
+  expect(
+    screen
+      .getByRole("button", { name: "Marked for review" })
+      .getAttribute("aria-pressed"),
+  ).toBe("true");
+  expect(
+    screen.getByRole("button", { name: "Review marked · 1" }),
+  ).toBeTruthy();
   for (let i = 0; i < 4; i++) {
     await user.click(
       within(

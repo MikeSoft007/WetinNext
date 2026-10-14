@@ -36,6 +36,10 @@ class CheckIn(BaseModel):
     note: str = Field(default="", max_length=1000)
 
 
+class BranchReviewRequest(BaseModel):
+    week: int = Field(ge=1, le=4)
+
+
 class ApplicationUpdate(BaseModel):
     status: Literal[
         "interested",
@@ -77,6 +81,9 @@ class ProfileAdjustment(BaseModel):
 
 
 class Resource(BaseModel):
+    price_amount: float | None = Field(default=None, ge=0)
+    price_currency: Literal["USD", "NGN", "RWF"] | None = None
+    location: str | None = Field(default=None, max_length=100)
     data_usage: str = "unknown"
     low_data_suitable: bool = False
     data_note: str = "Data use is unverified."
@@ -195,6 +202,9 @@ class WorkUpdate(BaseModel):
     checklist: dict[str, bool] = Field(default_factory=dict, max_length=3)
     evidence_url: str = Field(default="", max_length=1000)
     reflection: str = Field(default="", max_length=2000)
+    learning_note: str = Field(default="", max_length=1000)
+    practice_example: str = Field(default="", max_length=1000)
+    open_question: str = Field(default="", max_length=500)
 
     @field_validator("evidence_url")
     @classmethod
@@ -292,3 +302,22 @@ class ReminderSettings(BaseModel):
         except (ZoneInfoNotFoundError, ValueError):
             raise ValueError("Choose a valid timezone.")
         return value
+
+
+class LearningPickRequest(BaseModel):
+    research_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+    resource_id: str = Field(min_length=1, max_length=100)
+
+
+class LearningPickUpdate(BaseModel):
+    status: Literal["saved", "reading", "read"]
+
+
+class LearningBranchRequest(BaseModel):
+    title: str = Field(min_length=3, max_length=100)
+    task: str = Field(min_length=3, max_length=500)
+    resource_id: str = Field(default="", max_length=160)
+
+
+class LearningBranchUpdate(BaseModel):
+    completed: bool

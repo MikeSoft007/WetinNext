@@ -15,6 +15,7 @@ Use the root README and `submission/` as the current reviewer entry points. `gui
 - [Current architecture](architecture/README.md)
 - [API artifacts](api/README.md)
 - [Web research](guides/WEB_RESEARCH.md)
+- [Engagement and returning learners](guides/ENGAGEMENT_AND_RETURN.md)
 - [Goals and history](guides/MULTIPLE_GOALS.md)
 - [Practice, preparation and reminders](guides/PREPARATION_AND_REMINDERS.md)
 - [Seeded accounts](guides/DEMO_ACCOUNTS.md)

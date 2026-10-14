@@ -1,11 +1,20 @@
-import GoalPreparation, { FocusReminder } from "../progress/GoalPreparation";
+import GoalPrompt from "../goals/GoalPrompt";
+import ResourceBank from "../discovery/ResourceBank";
+import CareerJourney from "../progress/CareerJourney";
+import CareerBank from "../discovery/CareerBank";
+import WeekReviewModal from "../progress/WeekReviewModal";
+import LearningBranches from "../goals/LearningBranches";
+import CVWorkspace from "../cv/CVWorkspace";
+import GoalLaunchpad from "../learning/GoalLaunchpad";
+import ContinueLearning from "../learning/ContinueLearning";
+import GoalPreparation from "../progress/GoalPreparation";
 import GoalSwitcher from "../goals/GoalSwitcher";
 import SkillTracker from "../progress/SkillTracker";
 import ReadinessCheck from "../progress/ReadinessCheck";
 import GoalResearch from "../discovery/GoalResearch";
 import ProgressOverview from "../progress/ProgressOverview";
 import LinkedInBridge from "../discovery/LinkedInBridge";
-import WeekWorkbench, { EvidencePortfolio } from "../learning/WeekWorkbench";
+import { EvidencePortfolio } from "../learning/WeekWorkbench";
 import React, { useEffect, useState } from "react";
 import {
   ArrowUpRight,
@@ -25,6 +34,7 @@ import {
   SlidersHorizontal,
   History,
   FileText,
+  MapPin,
   ChevronRight,
 } from "lucide-react";
 import { api } from "../../shared/api";
@@ -47,8 +57,8 @@ import type {
   HistoryEntry,
 } from "../../shared/types";
 import { PathwayTracker } from "../goals/PathwayTracker";
+import CareerPathTree from "../goals/CareerPathTree";
 import { MatchAnalyzer } from "../opportunities/MatchAnalyzer";
-import TodayRecoveryActions from "../learning/TodayRecoveryActions";
 const initial: Profile = {
   name: "",
   learner_type: "student",
@@ -60,34 +70,53 @@ const initial: Profile = {
   low_data: true,
 };
 const nav = [
-  { label: "Today", icon: Route },
   { label: "Discover", icon: Compass },
   { label: "Progress", icon: History },
+  { label: "Review", icon: FileText },
 ];
 export default function LearnerWorkspace({
   onSignOut,
 }: {
   onSignOut: () => Promise<void>;
 }) {
+  const [libraryView, setLibraryView] = useState<"career" | "resource" | null>(
+    null,
+  );
+  const [reviewWeek, setReviewWeek] = useState<number | null>(null);
   const [researchVersion, setResearchVersion] = useState(0);
+  const [treeRefreshToken, setTreeRefreshToken] = useState(0);
   const [state, setState] = useState<State | null>(null),
     [resources, setResources] = useState<Resource[]>([]),
     [opps, setOpps] = useState<Opportunity[]>([]),
     [history, setHistory] = useState<HistoryEntry[]>([]);
   const [page, setPage] = useSectionRoute(learnerRoutes);
-  const [progressTab, setProgressTab] = useState(() =>
-    new URLSearchParams(location.search).get("view") === "practice"
-      ? "practice"
-      : "overview",
-  );
+  useEffect(() => setReviewWeek(null), [state?.goal_id, page]);
+  useEffect(() => {
+    if (
+      page === "Progress" &&
+      new URLSearchParams(location.search).get("view") === "plan" &&
+      state?.plan
+    )
+      setReviewWeek(
+        state.plan.weeks.find(
+          (week) => state.progress[String(week.week)]?.status !== "done",
+        )?.week ||
+          state.plan.weeks[0]?.week ||
+          null,
+      );
+  }, [page, location.search, state?.plan?.id]);
+  function progressView() {
+    const view = new URLSearchParams(location.search).get("view") || "overview";
+    return ["overview", "skills", "practice", "portfolio", "history"].includes(
+      view,
+    )
+      ? view
+      : "overview";
+  }
+  const [progressTab, setProgressTab] = useState(progressView);
   useEffect(() => {
     const sync = () => {
-      if (location.pathname === "/app/progress")
-        setProgressTab(
-          new URLSearchParams(location.search).get("view") === "practice"
-            ? "practice"
-            : "overview",
-        );
+      if (location.pathname === "/app/progress") setProgressTab(progressView());
     };
     window.addEventListener("popstate", sync);
     return () => window.removeEventListener("popstate", sync);
@@ -108,13 +137,11 @@ export default function LearnerWorkspace({
       useState<Opportunity | null>(null),
     [assessment, setAssessment] = useState<Assessment | null>(null),
     [matching, setMatching] = useState(false),
-    [note, setNote] = useState(""),
     [deleteOpen, setDeleteOpen] = useState(false),
     [adjustOpen, setAdjustOpen] = useState(false),
     [hours, setHours] = useState(3),
     [device, setDevice] = useState("laptop"),
     [lowData, setLowData] = useState(true),
-    [telegram, setTelegram] = useState<string | null>(null),
     [ready, setReady] = useState(false);
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
@@ -205,7 +232,6 @@ export default function LearnerWorkspace({
           telegram_bot_url: string | null;
           demo_mode: boolean;
         }>("/health");
-        setTelegram(health.telegram_bot_url);
         if (health.demo_mode) await api("/demo/session", { method: "POST" });
         const [s, r, h] = await Promise.all([
           api<State>("/me"),
@@ -310,13 +336,13 @@ export default function LearnerWorkspace({
           method: "PUT",
           body: JSON.stringify({
             ...profile,
-            name: state?.profile.name || profile.name,
+            name: state?.profile.name || profile.name || "Learner",
           }),
         },
       );
       await refresh();
       setSetup(false);
-      setPage("Today");
+      setPage("Discover");
       const researchMarket =
         !state?.profile.goal && ["Nigeria", "Rwanda"].includes(profile.country)
           ? profile.country
@@ -349,20 +375,20 @@ export default function LearnerWorkspace({
       setBusy(false);
     }
   }
-  async function checkIn(status: string) {
-    if (!week) return;
+  async function checkIn(weekNumber: number, status: string) {
     setBusy(true);
     setError("");
     try {
       const result = await api<{ advice: string }>(
-        `/weeks/${week.week}/check-in`,
-        { method: "POST", body: JSON.stringify({ status, note }) },
+        `/weeks/${weekNumber}/check-in`,
+        { method: "POST", body: JSON.stringify({ status, note: "" }) },
       );
       await refresh();
       setToast(result.advice);
-      setNote("");
+      setTreeRefreshToken((token) => token + 1);
     } catch (e) {
       setError((e as Error).message);
+      throw e;
     } finally {
       setBusy(false);
     }
@@ -397,12 +423,10 @@ export default function LearnerWorkspace({
     completed = Object.values(state?.progress ?? {}).filter(
       (p) => p.status === "done",
     ).length,
-    week = plan?.weeks.find(
-      (w) => state?.progress[String(w.week)]?.status !== "done",
-    ),
     name = state?.profile.name?.split(" ")[0];
   const pageTitles: Record<string, string> = {
-    Today: "Today",
+    Today: "Discover",
+    Review: "Review your experience",
     Discover: "Discover",
     Progress: "Progress",
     "Opportunity fit": "Opportunity fit",
@@ -416,7 +440,7 @@ export default function LearnerWorkspace({
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            setPage("Today");
+            setPage("Discover");
           }}
         >
           <span className="brand-icon">
@@ -425,21 +449,18 @@ export default function LearnerWorkspace({
           Wetin<span>Next</span>
           <span className="brand-dot">.</span>
         </a>
-        <div className="market-switch" aria-label="Active opportunity market">
-          {["Nigeria", "Rwanda", "Global"].map((m) => (
-            <button
-              key={m}
-              aria-pressed={market === m}
-              className={market === m ? "selected" : ""}
-              onClick={() => setMarket(m)}
-            >
-              <span>
-                {m === "Nigeria" ? "🇳🇬" : m === "Rwanda" ? "🇷🇼" : "🌐"}
-              </span>
-              {m}
-            </button>
-          ))}
-        </div>
+        <label className="location-select">
+          <MapPin size={15} />
+          <select
+            aria-label="Search location"
+            value={market}
+            onChange={(event) => setMarket(event.target.value)}
+          >
+            <option value="Nigeria">Nigeria</option>
+            <option value="Rwanda">Rwanda</option>
+            <option value="Global">Global · online & international</option>
+          </select>
+        </label>
         <label className="quick-search">
           <Search size={17} />
           <input
@@ -455,29 +476,13 @@ export default function LearnerWorkspace({
           <kbd>/</kbd>
         </label>
         <div className="top-actions">
-          {telegram ? (
-            <a
-              className="telegram-button"
-              href={telegram}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Open Telegram bot"
-            >
-              <Send size={18} />
-            </a>
-          ) : (
-            <button
-              className="telegram-button"
-              aria-label="Telegram bot connection status"
-              onClick={() =>
-                setToast(
-                  "Telegram is not connected yet. A real bot URL can be configured on the backend.",
-                )
-              }
-            >
-              <Send size={18} />
-            </button>
-          )}
+          <span
+            className="telegram-roadmap"
+            title="Future feature: phone-based check-ins and next steps via Telegram"
+          >
+            <Send size={15} />
+            <span>Telegram · coming later</span>
+          </span>
           <span
             className="streak"
             title="Consecutive calendar weeks with a check-in"
@@ -524,14 +529,6 @@ export default function LearnerWorkspace({
               {page === label && <span className="nav-dot" />}
             </button>
           ))}
-          <a
-            className="nav-item"
-            href="/cv"
-            aria-label="CV review and next actions"
-          >
-            <FileText size={18} />
-            <span>CV review</span>
-          </a>
         </nav>
         <div className="sidebar-bottom">
           <div className="small-steps">
@@ -587,7 +584,7 @@ export default function LearnerWorkspace({
               await refresh();
               setResearchVersion((value) => value + 1);
               setSelectedId("");
-              setPage("Today");
+              setPage("Discover");
             }}
           />
         )}
@@ -595,7 +592,7 @@ export default function LearnerWorkspace({
           className={`page-heading page-heading--${page === "Opportunity fit" ? "opportunity" : page.toLowerCase()}`}
         >
           <h1>{pageTitles[page]}</h1>
-          {page === "Today" && plan && (
+          {page === "Discover" && plan && (
             <button
               className="secondary adjust-button"
               disabled={!ready}
@@ -606,7 +603,16 @@ export default function LearnerWorkspace({
             </button>
           )}
         </section>
-        {page === "Today" && state?.profile.goal && (
+        {["Discover", "Progress", "Review"].includes(page) && (
+          <p className="page-guidance">
+            {page === "Discover"
+              ? "Explore careers and resources, then turn your goal into a plan."
+              : page === "Progress"
+                ? "Continue your weekly work and build evidence for your next step."
+                : "Compare your current experience with the skills your goal needs."}
+          </p>
+        )}
+        {page === "Discover" && state?.profile.goal && (
           <p className="learner-context">
             {state.profile.hours ?? "—"} hrs / week
             <span aria-hidden="true">·</span>
@@ -617,6 +623,72 @@ export default function LearnerWorkspace({
             {market}
           </p>
         )}
+        {ready &&
+          state?.profile.goal &&
+          ["Discover", "Progress", "Review"].includes(page) && (
+            <section
+              className="learner-mission"
+              aria-label="Your current goal and next action"
+            >
+              <div className="mission-symbol" aria-hidden="true">
+                <svg viewBox="0 0 80 80" width="64" height="64" fill="none">
+                  <path
+                    d="M16 62V24h18v38M34 62V38h18v24M52 62V14h12v48"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M13 17l16-8 17 15 18-19"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="64" cy="5" r="4" fill="currentColor" />
+                </svg>
+              </div>
+              <div>
+                <span className="public-eyebrow">
+                  YOUR DIRECTION · {market}
+                </span>
+                <h2>{state.profile.goal}</h2>
+                <p>
+                  {plan
+                    ? `${completed} of ${plan.weeks.length} weeks complete · ${plan.weeks.find((week) => state.progress[String(week.week)]?.status !== "done")?.title || "Your starter plan is complete. Grow another learning branch."}`
+                    : "Start with a sourced guide. Build one useful skill at a time."}
+                </p>
+              </div>
+              {page !== "Review" && (
+                <button
+                  className="primary"
+                  onClick={() => {
+                    if (page === "Progress" && plan)
+                      setReviewWeek(
+                        plan.weeks.find(
+                          (week) =>
+                            state.progress[String(week.week)]?.status !==
+                            "done",
+                        )?.week ||
+                          plan.weeks[0]?.week ||
+                          null,
+                      );
+                    else
+                      navigateApp(
+                        plan
+                          ? "/app/progress?view=plan"
+                          : "/app/discover?view=plan",
+                      );
+                  }}
+                >
+                  {plan
+                    ? page === "Discover"
+                      ? "View my progress"
+                      : "Continue learning"
+                    : "Build my starter plan"}
+                  <ArrowRight size={15} />
+                </button>
+              )}
+            </section>
+          )}
         {!ready && !error ? (
           <div className="loading-inline">
             <LoaderCircle className="spin" size={20} />
@@ -624,88 +696,100 @@ export default function LearnerWorkspace({
           </div>
         ) : (
           <>
-            {page === "Today" && <FocusReminder state={state} />}
-            {page === "Today" && !plan && (
-              <section className="card next-task today-start-card">
-                <h2>
-                  {state?.profile.goal
-                    ? "Find one useful first step."
-                    : "Start with a goal that matters to you."}
-                </h2>
-                <p>
-                  {state?.profile.goal
-                    ? "Find a credible resource or build a practical learning plan."
-                    : "Choose a direction. You can change it later."}
-                </p>
-                <button
-                  className="primary"
-                  onClick={() =>
-                    state?.profile.goal
-                      ? navigateApp("/app/discover?view=plan")
-                      : setSetup(true)
-                  }
-                >
-                  {state?.profile.goal
-                    ? "Find my first learning step"
-                    : "Choose my learning goal"}
-                  <ArrowRight size={16} />
-                </button>
-              </section>
-            )}
-            {page === "Today" && plan && (
-              <section className="card next-task today-next-task">
-                <h2>{week?.title || "Your first sprint is complete"}</h2>
-                <p>
-                  {week?.task ||
-                    "Review your saved work and choose what you would like to build next."}
-                </p>
-                {week ? (
-                  <>
-                    <WeekWorkbench
-                      week={week}
-                      planId={plan.id}
-                      status={state?.progress[String(week.week)]?.status}
+            {page === "Discover" && (
+              <div className="discover-library-layout">
+                <div className="discover-main">
+                  <GoalPrompt
+                    onGoal={(goal) => {
+                      setProfile({
+                        ...initial,
+                        ...state?.profile,
+                        goal,
+                        career_track: "auto",
+                      } as Profile);
+                      setSetup(true);
+                    }}
+                  />
+                  {state?.profile.goal && (
+                    <GoalResearch
+                      state={state}
+                      market={market}
+                      onSaved={refresh}
+                      onSetup={() => setSetup(true)}
+                      refreshToken={researchVersion}
+                      query={search}
                     />
-                    <details className="today-recovery">
-                      <summary>Need more time or a different resource?</summary>
-                      <TodayRecoveryActions
-                        busy={busy}
-                        note={note}
-                        advice={state?.progress[String(week.week)]?.advice}
-                        onNoteChange={setNote}
-                        onCheckIn={(status) => void checkIn(status)}
-                        onAdjust={openAdjust}
-                        onDiscover={() => setPage("Discover")}
-                      />
-                    </details>
-                  </>
-                ) : (
-                  <button
-                    className="primary"
-                    onClick={() => setPage("Progress")}
-                  >
-                    Review my saved work
-                    <ArrowRight size={16} />
-                  </button>
-                )}
-              </section>
-            )}
-            {(page === "Today" || page === "Discover") && (
-              <GoalResearch
-                state={state}
-                market={market}
-                onSaved={refresh}
-                onSetup={() => setSetup(true)}
-                compact={page === "Today"}
-                refreshToken={researchVersion}
-                query={page === "Discover" ? search : ""}
-              />
+                  )}
+                </div>
+                <aside
+                  className="discovery-library-rail"
+                  aria-label="Career and resource libraries"
+                >
+                  <header>
+                    <span className="public-eyebrow">
+                      YOUR EXPLORATION LIBRARY
+                    </span>
+                    <h2>Explore further</h2>
+                  </header>
+                  <div className="library-rail-tabs">
+                    <button
+                      aria-pressed={libraryView === "career"}
+                      onClick={() =>
+                        setLibraryView(
+                          libraryView === "career" ? null : "career",
+                        )
+                      }
+                    >
+                      Career bank
+                    </button>
+                    <button
+                      aria-pressed={libraryView === "resource"}
+                      onClick={() =>
+                        setLibraryView(
+                          libraryView === "resource" ? null : "resource",
+                        )
+                      }
+                    >
+                      Resource bank
+                    </button>
+                  </div>
+                  {libraryView === "career" && (
+                    <CareerBank
+                      market={market}
+                      state={state}
+                      onChoose={(title) => {
+                        setProfile({
+                          ...initial,
+                          ...state?.profile,
+                          goal: `Become a ${title}`,
+                          career_track: "auto",
+                        } as Profile);
+                        setSetup(true);
+                      }}
+                    />
+                  )}
+                  {libraryView === "resource" && (
+                    <ResourceBank state={state} market={market} />
+                  )}
+                  <p className="privacy-note">
+                    Browse, compare and choose a direction without replacing
+                    your saved goal.
+                  </p>
+                </aside>
+              </div>
             )}
             {page === "Discover" && state?.profile.goal && (
               <details className="catalogue-more">
                 <summary>Explore LinkedIn for this goal</summary>
                 <LinkedInBridge goal={state.profile.goal} market={market} />
               </details>
+            )}
+            {page === "Review" && (
+              <CVWorkspace
+                key={state?.goal_id || state?.profile.goal}
+                embedded
+                market={market}
+              />
             )}
             {page === "Opportunity fit" && (
               <div className="matcher-layout">
@@ -757,15 +841,15 @@ export default function LearnerWorkspace({
                 >
                   {[
                     ["overview", "Overview"],
-                    ["skills", "Skills"],
-                    ["practice", "Practice quiz"],
-                    ["portfolio", "My evidence"],
-                    ["history", "History"],
+                    ["skills", "Skill evidence"],
+                    ["practice", "Practice checks"],
+                    ["portfolio", "Portfolio & applications"],
+                    ["history", "Journey log"],
                   ].map(([id, label]) => (
                     <button
                       key={id}
                       aria-pressed={progressTab === id}
-                      onClick={() => setProgressTab(id)}
+                      onClick={() => navigateApp(`/app/progress?view=${id}`)}
                     >
                       {label}
                     </button>
@@ -775,8 +859,34 @@ export default function LearnerWorkspace({
                   <ProgressOverview
                     state={personalisedState}
                     onStart={() => setSetup(true)}
-                    onContinue={() => setPage("Today")}
+                    onContinue={() =>
+                      setReviewWeek(
+                        plan?.weeks.find(
+                          (week) =>
+                            state?.progress[String(week.week)]?.status !==
+                            "done",
+                        )?.week ||
+                          plan?.weeks[0]?.week ||
+                          null,
+                      )
+                    }
+                    onWeekClick={setReviewWeek}
                   />
+                  {page === "Progress" && state?.profile.goal && (
+                    <>
+                      <ContinueLearning state={state} market={market} />
+                      {plan && (
+                        <details className="extend-learning">
+                          <summary>Extend my learning</summary>
+                          <LearningBranches
+                            planId={plan.id || state.profile.goal || plan.title}
+                            resources={plan.resources || []}
+                          />
+                        </details>
+                      )}
+                    </>
+                  )}
+
                   {state?.profile.goal && (
                     <details className="sprint-overview">
                       <summary>Goals and reminders</summary>
@@ -813,10 +923,11 @@ export default function LearnerWorkspace({
                   />
                 </div>
                 <div hidden={progressTab !== "history"}>
+                  <CareerJourney state={state} />
                   <HistoryPanel
                     history={history}
                     country={state?.profile.country}
-                    onPathway={() => setPage("Today")}
+                    onPathway={() => setPage("Discover")}
                   />
                 </div>
               </div>
@@ -902,9 +1013,25 @@ export default function LearnerWorkspace({
           </button>
         </div>
       )}
+      {reviewWeek !== null &&
+        personalisedState?.plan?.weeks.find(
+          (week) => week.week === reviewWeek,
+        ) && (
+          <WeekReviewModal
+            state={personalisedState}
+            week={
+              personalisedState.plan.weeks.find(
+                (week) => week.week === reviewWeek,
+              )!
+            }
+            onClose={() => setReviewWeek(null)}
+            onComplete={(week) => checkIn(week, "done")}
+            onSaved={refresh}
+          />
+        )}
       {setup && (
         <OnboardingModal
-          hasProfile={!!state?.profile.name}
+          hasProfile={!!state}
           profile={profile}
           setProfile={setProfile}
           busy={busy}
@@ -953,7 +1080,7 @@ export default function LearnerWorkspace({
                     setState(await api<State>("/me"));
                     setHistory(await api<HistoryEntry[]>("/check-ins"));
                     setDeleteOpen(false);
-                    setPage("Today");
+                    setPage("Discover");
                     setToast("Your profile and progress have been deleted.");
                   } catch (e) {
                     setError((e as Error).message);

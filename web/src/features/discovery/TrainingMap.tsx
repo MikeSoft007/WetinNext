@@ -1,3 +1,4 @@
+import { isDirectSource } from "../../shared/sourceLinks";
 import { MapPin, ArrowUpRight } from "lucide-react";
 /** Regional context only; campus links open explicit institution searches. */
 export default function TrainingMap({
@@ -7,7 +8,7 @@ export default function TrainingMap({
 }: {
   location: string;
   market?: string;
-  places: { name: string; location: string }[];
+  places: { name: string; location: string; url?: string }[];
 }) {
   const label =
     market === "Global"
@@ -50,18 +51,20 @@ export default function TrainingMap({
         <span>© OpenStreetMap contributors</span>
       </p>
       <div className="map-choices">
-        {places.map((place) => (
-          <a
-            key={place.name + place.location}
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + " " + place.location)}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <MapPin size={13} />
-            {place.name}
-            <ArrowUpRight size={12} />
-          </a>
-        ))}
+        {places
+          .filter((place) => place.url && isDirectSource(place.url))
+          .map((place) => (
+            <a
+              key={place.name + place.location}
+              href={place.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MapPin size={13} />
+              {place.name}
+              <ArrowUpRight size={12} />
+            </a>
+          ))}
       </div>
     </section>
   );

@@ -4,7 +4,9 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OnboardingModal } from "../src/features/goals/OnboardingModal";
 import CVWorkspace from "../src/features/cv/CVWorkspace";
-import WeekWorkbench from "../src/features/learning/WeekWorkbench";
+import WeekWorkbench, {
+  EvidencePortfolio,
+} from "../src/features/learning/WeekWorkbench";
 import TodayRecoveryActions from "../src/features/learning/TodayRecoveryActions";
 import type { Profile } from "../src/shared/types";
 import { api } from "../src/shared/api";
@@ -233,7 +235,17 @@ it("saves action ticks separately from unsaved evidence, then saves the evidence
     week: 1,
     sprint_id: "sprint-1",
     title: "First project",
-    resource: null,
+    resource: {
+      id: "mdn-web",
+      title: "MDN HTML Guide",
+      provider: "MDN",
+      url: "https://developer.mozilla.org/en-US/docs/Learn",
+      format: "Text",
+      device: "laptop",
+      cost: "Free",
+      review: "Authoritative reference.",
+      sample_exercise: "Create a page with headings and useful links.",
+    },
     actions: [
       {
         id: "learn",
@@ -265,10 +277,27 @@ it("saves action ticks separately from unsaved evidence, then saves the evidence
   );
   const user = userEvent.setup();
   await screen.findByRole("checkbox");
-  await user.click(screen.getByText("Keep evidence of your work"));
-  fireEvent.change(screen.getByLabelText("What did you build or learn?"), {
-    target: { value: "I built a page." },
+  expect(screen.getByText("A working page")).toBeTruthy();
+  expect(
+    screen.getByRole("button", { name: /Add a learning note/ }),
+  ).toBeTruthy();
+  expect(screen.queryByLabelText("ONE IDEA TO KEEP")).toBeNull();
+  await user.click(screen.getByRole("button", { name: /Add a learning note/ }));
+  expect(screen.getByLabelText("ONE IDEA TO KEEP")).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("ONE IDEA TO KEEP"), {
+    target: { value: "I learned to use semantic headings." },
   });
+  await user.click(screen.getByRole("button", { name: "Collapse note" }));
+  expect(screen.queryByLabelText("ONE IDEA TO KEEP")).toBeNull();
+  expect(screen.getByText("I learned to use semantic headings.")).toBeTruthy();
+  await user.click(
+    screen.getByRole("button", { name: /I learned to use semantic headings/ }),
+  );
+  expect(
+    screen.getAllByText(/Create a page with headings and useful links/).length,
+  ).toBeGreaterThan(0);
+  expect(screen.queryByText("YOUR EXAMPLE")).toBeNull();
+  expect(screen.queryByText("NEXT QUESTION")).toBeNull();
   await user.click(screen.getByRole("checkbox"));
   await waitFor(() =>
     expect(request.mock.calls.some(([, init]) => init?.method === "PUT")).toBe(
@@ -283,12 +312,65 @@ it("saves action ticks separately from unsaved evidence, then saves the evidence
   expect(first.reflection).toBe("");
   expect(first.checklist.learn).toBe(true);
   await screen.findByText("Action saved.");
-  await user.click(screen.getByRole("button", { name: "Save evidence" }));
+  await user.click(screen.getByRole("button", { name: "Save note" }));
   await screen.findByText("Your evidence is saved.");
   const saves = request.mock.calls.filter(([, init]) => init?.method === "PUT");
-  expect(JSON.parse(String(saves.at(-1)![1]!.body)).reflection).toBe(
-    "I built a page.",
+  const saved = JSON.parse(String(saves.at(-1)![1]!.body));
+  expect(saved.reflection).toBe("I learned to use semantic headings.");
+  expect(saved.learning_note).toBe("I learned to use semantic headings.");
+  expect(saved.practice_example).toBe("");
+  expect(saved.open_question).toBe("");
+  expect(screen.queryByLabelText("ONE IDEA TO KEEP")).toBeNull();
+  expect(
+    screen.getByRole("button", { name: /I learned to use semantic headings/ }),
+  ).toBeTruthy();
+});
+
+it("shows saved learning notes as a visual evidence board", async () => {
+  request.mockResolvedValue([
+    {
+      week: 1,
+      checklist: { learn: true, build: true },
+      evidence_url: "https://example.com/project",
+      reflection: "Legacy reflection",
+      learning_note: "I learned to use semantic headings.",
+      practice_example: "I built a page with a navigation link.",
+      open_question: "When should I use an ordered list?",
+      updated_at: "2026-10-13T12:00:00Z",
+    },
+  ]);
+  render(
+    <EvidencePortfolio
+      state={{
+        profile,
+        plan: {
+          title: "Web foundations",
+          outcome: "Build a page",
+          weeks: [
+            {
+              week: 1,
+              title: "Semantic page structure",
+              task: "Build a page",
+              success: "Working page",
+              resource_id: "mdn-web",
+              minutes: 60,
+            },
+          ],
+          engine: "test",
+          notice: "",
+        },
+        progress: {},
+        applications: {},
+      }}
+    />,
   );
+  expect(await screen.findByText("Semantic page structure")).toBeTruthy();
+  expect(screen.getByText("I learned to use semantic headings.")).toBeTruthy();
+  expect(
+    screen.getByText("I built a page with a navigation link."),
+  ).toBeTruthy();
+  expect(screen.getByText("When should I use an ordered list?")).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Open my work" })).toBeTruthy();
 });
 
 it("offers task completion and recovery choices beside the current task", async () => {

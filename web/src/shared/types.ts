@@ -21,6 +21,9 @@ export type Profile = {
   low_data: boolean;
 };
 export type Week = {
+  description?: string;
+  learning_objectives?: string[];
+  resource_guidance?: string;
   week: number;
   title: string;
   task: string;
@@ -45,16 +48,44 @@ export type State = {
     weeks: Week[];
     engine: string;
     notice: string;
+    research_guide?: {
+      qualification_route?: string;
+      orientation?: string;
+      places?: {
+        name: string;
+        kind: string;
+        location: string;
+        url: string;
+        entry_route: string;
+        cost_note?: string;
+        availability_note?: string;
+      }[];
+      opportunities?: {
+        title: string;
+        provider: string;
+        location: string;
+        url: string;
+        type: string;
+        eligibility: string;
+        deadline_note: string;
+        availability_note: string;
+        required_skills?: string[];
+      }[];
+    };
   };
   progress: Progress;
   applications: Record<string, string>;
   metrics?: { weekly_streak: number };
 };
 export type Resource = {
+  price_amount?: number | null;
+  price_currency?: string | null;
+  location?: string | null;
   data_usage?: string;
   low_data_suitable?: boolean;
   data_note?: string;
   learning_outcomes?: string[];
+  skills?: string[];
   sample_exercise?: string;
   suggested_session_minutes?: number;
   prerequisites?: string;

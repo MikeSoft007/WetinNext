@@ -18,3 +18,7 @@ app.include_router(ingestion_router, prefix="/api/v1")
 from .search import router as search_router
 
 app.include_router(search_router, prefix="/api/v1")
+
+from .careers import router as careers_router
+
+app.include_router(careers_router, prefix="/api/v1")

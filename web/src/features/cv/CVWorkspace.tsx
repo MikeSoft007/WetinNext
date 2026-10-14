@@ -16,6 +16,7 @@ import { api } from "../../shared/api";
 import type { Opportunity, State, Resource } from "../../shared/types";
 import { CatalogCollection } from "../../shared/ui/Collection";
 type Review = {
+  target_skills?: string[];
   suggested_resources?: Resource[];
   id: string;
   filename: string;
@@ -31,7 +32,11 @@ type Review = {
   extracted_preview: string;
   word_count: number;
 };
-export default function CVWorkspace() {
+export default function CVWorkspace({
+  embedded = false,
+  market,
+}: { embedded?: boolean; market?: string } = {}) {
+  const [portfolioText, setPortfolioText] = useState("");
   const [reviews, setReviews] = useState<Review[]>([]),
     [selected, setSelected] = useState<Review | null>(null),
     [opps, setOpps] = useState<Opportunity[]>([]),
@@ -63,7 +68,7 @@ export default function CVWorkspace() {
           setGoal(s.profile.goal || "");
           if (s.profile.goal) {
             void api<{ opportunities: { opportunity: Opportunity }[] }>(
-              `/recommendations?country=${encodeURIComponent(sessionStorage.getItem("wetinnext-market") || s.profile.country || "Nigeria")}`,
+              `/recommendations?country=${encodeURIComponent(market || sessionStorage.getItem("wetinnext-market") || s.profile.country || "Nigeria")}`,
             )
               .then((data) => {
                 if (active)
@@ -85,7 +90,7 @@ export default function CVWorkspace() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [market]);
   useEffect(() => {
     if (step === 3) results.current?.focus();
   }, [step, selected?.id]);
@@ -161,20 +166,32 @@ export default function CVWorkspace() {
     if (fileInput.current) fileInput.current.value = "";
   }
   return (
-    <div className="management-page cv-studio">
-      <header className="management-header">
-        <a className="public-brand" href="/">
-          WetinNext<span>.</span>
-        </a>
-        <a href="/app">
-          <ArrowLeft size={15} />
-          Back to my workspace
-        </a>
-      </header>
+    <div
+      className={
+        embedded
+          ? "management-page cv-studio cv-page-embedded"
+          : "management-page cv-studio"
+      }
+    >
+      {!embedded && (
+        <header className="management-header">
+          <a className="public-brand" href="/">
+            WetinNext<span>.</span>
+          </a>
+          <a href="/app">
+            <ArrowLeft size={15} />
+            Back to my workspace
+          </a>
+        </header>
+      )}
       <main className="management-main">
         <div className="studio-heading">
           <div>
-            <h1>CV review</h1>
+            {embedded ? (
+              <h2>Compare your current experience</h2>
+            ) : (
+              <h1>CV review</h1>
+            )}
             <p>
               {goal
                 ? `Get practical feedback for ${goal}.`
@@ -190,6 +207,40 @@ export default function CVWorkspace() {
         <div className="cv-layout">
           <aside className="cv-input-column">
             <section className="management-card cv-input-card">
+              <details className="review-paste">
+                <summary>Use résumé or personal website text</summary>
+                <label htmlFor="portfolio-text">
+                  Paste the experience and project content you want compared
+                  with your goal
+                </label>
+                <textarea
+                  id="portfolio-text"
+                  maxLength={60000}
+                  value={portfolioText}
+                  onChange={(e) => setPortfolioText(e.target.value)}
+                  placeholder="Your experience, projects, skills and qualifications…"
+                />
+                <small>
+                  For a website, paste its visible content. A link alone is not
+                  reviewed.
+                </small>
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={portfolioText.trim().length < 80}
+                  onClick={() => {
+                    setFile(
+                      new File([portfolioText], "portfolio.txt", {
+                        type: "text/plain",
+                      }),
+                    );
+                    setStep(2);
+                  }}
+                >
+                  Use this evidence
+                </button>
+              </details>
+
               {step === 1 && (
                 <form className="flow-panel" onSubmit={upload} aria-busy={busy}>
                   <label
@@ -407,6 +458,72 @@ export default function CVWorkspace() {
                       </p>
                     </div>
                   </div>
+                  <section
+                    className="cv-goal-verdict"
+                    aria-label="CV goal comparison"
+                  >
+                    <span className="public-eyebrow">
+                      WHAT THIS MEANS FOR YOUR GOAL
+                    </span>
+                    <h3>
+                      {selected.gaps.length
+                        ? "Build or clarify the missing evidence"
+                        : selected.supported.length
+                          ? "Your CV mentions relevant skills"
+                          : "This review needs explicit learning targets"}
+                    </h3>
+                    <p>
+                      {selected.supported.length
+                        ? `${selected.supported.length} target skill terms are mentioned in your CV. Show concrete examples of how you used them.`
+                        : "The review did not identify matching target skill terms. This may reflect missing experience, different wording or extraction limits."}
+                    </p>
+                    <div className="cv-comparison-columns">
+                      <div>
+                        <h4>Relevant mentions</h4>
+                        {selected.supported.length ? (
+                          <ul>
+                            {selected.supported.map((skill) => (
+                              <li key={skill}>
+                                <Check size={13} /> {skill}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>No goal-specific matches recorded.</p>
+                        )}
+                      </div>
+                      <div>
+                        <h4>Needs evidence or learning</h4>
+                        {selected.gaps.length ? (
+                          <ul>
+                            {selected.gaps.map((skill) => (
+                              <li key={skill}>
+                                {skill}
+                                <small>
+                                  If you have this skill, add an example.
+                                  Otherwise practise it before claiming it.
+                                </small>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>
+                            {selected.supported.length
+                              ? "No missing terms detected in the tracked requirements. Qualifications and proficiency still need checking."
+                              : "Re-run your review with an active learning plan to compare its target skills."}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <p className="privacy-note">
+                      This is an explainable text comparison, not a hiring
+                      score. A missing keyword is not proof that you lack the
+                      skill.
+                    </p>
+                  </section>
+                  <button className="text-link" onClick={startAgain}>
+                    Review an updated CV or portfolio
+                  </button>
                   <div className="cv-evidence-summary">
                     <div>
                       <strong>{selected.skills.length}</strong>

@@ -8,7 +8,7 @@ The proof of concept demonstrates an expansion strategy; it does not claim produ
 | Language | English interface and guidance | Human-reviewed French/Pidgin translations, accessible terminology and language-specific retrieval/evaluation |
 | Access | Text-first preferences, no compulsory images, links to free learning | Measure real mobile data use, cache useful guides and evaluate basic-device usability |
 | Content | Public adapters, publication gates, freshness metadata and on-demand web research | Country/provider coverage monitoring, editorial accountability and local partnerships |
-| Identity | Stable seeded local identities and Supabase JWT verification foundation | Verify live account flows, refresh sessions and complete Telegram linking |
+| Identity | Stable seeded local identities and Supabase JWT verification foundation | Verify live account flows, refresh sessions and build the future Telegram phone-access flow and account linking |
 | Compute | Independent HTTP services, bounded research jobs and explicit AI errors | Durable distributed queue, retry budgets, per-user quotas and operational metrics |
 | Storage | Separate learner/catalogue/research ownership, local SQLite prototype | Migrations and managed stores; catalogue/research need SQLite-specific code changes |
 | Privacy | Scoped access, original CVs not retained, erasure tests and private credentials | Formal retention policy, threat review, deployment controls and consent review |

@@ -5,7 +5,7 @@ Prepare the local services and seed accounts using the root README. Use syntheti
 | Time | Show | Point to explain |
 | --- | --- | --- |
 | 0:00–0:30 | One learner problem: scattered learning, unclear next steps | WetinNext connects resources to action and evidence |
-| 0:30–1:15 | Sign in as Ada; open Today, then check-in | The plan fits a learner profile and turns study into recorded work |
+| 0:30–1:15 | Sign in as Ada; open Discover, then Progress and save work | The plan fits a learner profile and turns study into recorded work |
 | 1:15–2:15 | Open a pre-researched non-computing goal, such as introductory nursing | Discovery goes beyond a static catalogue; show exact learning links, local training and qualification limits |
 | 2:15–2:45 | Switch between saved goals and open Progress | Work persists independently; the heatmap shows recorded signals, not claimed mastery |
 | 2:45–3:30 | Start a short practice quiz; choose count, difficulty and time | Show selected/correct answers and the referenced lesson after submission |
@@ -23,3 +23,5 @@ Prepare the local services and seed accounts using the root README. Use syntheti
 - End with the learner's next action, then explain the next development milestone.
 
 The web app and these documents support the demo. A final video, slide deck and actual submission upload are not created by this repository cleanup.
+
+The current presentation script is in [PRESENTATION.md](PRESENTATION.md), with the latest three-tab flow and grading evidence.
