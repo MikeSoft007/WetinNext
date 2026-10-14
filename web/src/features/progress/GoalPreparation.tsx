@@ -25,10 +25,10 @@ type Goal = {
 };
 const targets: Record<string, string> = {
   Plan: "/app/discover?view=plan",
-  Practice: "/app",
-  Evidence: "/app",
+  Practice: "/app/progress?view=plan",
+  Evidence: "/app/progress?view=plan",
   Quiz: "/app/progress?view=practice#practice-check",
-  CV: "/cv",
+  CV: "/app/review",
 };
 export default function GoalPreparation({
   state,

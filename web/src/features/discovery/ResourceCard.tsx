@@ -55,7 +55,16 @@ export default function ResourceCard({ resource }: { resource: Resource }) {
         <span className="eyebrow">{resource.provider}</span>
       </div>
       <h3>{resource.title}</h3>
-      <p>{resource.format}</p>
+      <p>
+        <span className="response-cost-tag">
+          {/^free\b/i.test(resource.cost)
+            ? "Free"
+            : /^paid\b/i.test(resource.cost)
+              ? "Paid"
+              : "Check cost"}
+        </span>
+        {resource.format}
+      </p>
       <ResourceDetails resource={resource} />
       <div className="resource-card-footer">
         <span>

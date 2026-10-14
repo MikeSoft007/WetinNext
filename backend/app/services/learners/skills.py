@@ -33,7 +33,9 @@ def skills(row: Learner = Depends(learner), session: Session = Depends(db)):
     evidence = {
         r.week
         for r in records
-        if json.loads(r.payload).get("reflection")
+        if json.loads(r.payload).get("learning_note")
+        or json.loads(r.payload).get("practice_example")
+        or json.loads(r.payload).get("reflection")
         or json.loads(r.payload).get("evidence_url")
     }
     coverage = {}

@@ -158,3 +158,17 @@ def test_pdf_text_extraction():
         + b"\n%%EOF"
     )
     assert "Python SQL Excel" in extract("cv.pdf", base64.b64encode(pdf).decode())
+
+
+def test_cv_compares_goal_targets_without_a_selected_job():
+    from app.services.learners.cv import review
+
+    result = review(
+        "Skills: Linux. Experience: maintained Linux systems. Education: university. Projects: server exercises.",
+        "Learn DevOps",
+        goal_skills=["Linux", "Containers"],
+    )
+    assert result["target_skills"] == ["Linux", "Containers"]
+    assert result["supported"] == ["Linux"]
+    assert result["gaps"] == ["Containers"]
+    assert any("Containers" in action["title"] for action in result["actions"])

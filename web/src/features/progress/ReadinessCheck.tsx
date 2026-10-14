@@ -86,6 +86,7 @@ export default function ReadinessCheck({
   state: State | null;
   onUpdated?: () => Promise<void>;
 }) {
+  const [flagged, setFlagged] = useState<number[]>([]);
   const [summary, setSummary] = useState<Readiness | null>(null),
     [attempt, setAttempt] = useState<Attempt | null>(null),
     [answers, setAnswers] = useState<Record<number, number>>({}),
@@ -98,6 +99,7 @@ export default function ReadinessCheck({
     [confirm, setConfirm] = useState(false),
     [minutes, setMinutes] = useState(10),
     [remaining, setRemaining] = useState<number | null>(null);
+  useEffect(() => setFlagged([]), [attempt?.id]);
   useEffect(() => {
     if (!state) return;
     let active = true;
@@ -257,7 +259,16 @@ export default function ReadinessCheck({
         <div className="quiz-setup">
           <div className="quiz-setup-heading">
             <SlidersHorizontal size={18} />
-            <h3>Make it your practice</h3>
+            <div>
+              <span className="public-eyebrow">
+                DESIGN YOUR PRACTICE SESSION
+              </span>
+              <h3>Choose your challenge</h3>
+              <p>
+                Set the size, pace and difficulty. You’ll get answer
+                explanations and linked lessons.
+              </p>
+            </div>
           </div>
           <label className="quiz-count">
             Number of questions
@@ -324,6 +335,16 @@ export default function ReadinessCheck({
               </label>
             ))}
           </fieldset>
+          <div
+            className="quiz-session-preview"
+            aria-label="Practice session summary"
+          >
+            <strong>{Number.isInteger(count) ? count : "—"} questions</strong>
+            <span>
+              {levels.find((level) => level.id === difficulty)?.title}
+            </span>
+            <span>{minutes ? `${minutes} minutes` : "No timer"}</span>
+          </div>
           <button
             className="primary"
             disabled={!Number.isInteger(count) || count < 1 || count > 20}
@@ -421,6 +442,31 @@ export default function ReadinessCheck({
             <span style={{ width: `${(answered / total) * 100}%` }} />
           </div>
           <h3 className="quiz-set-title">{attempt.title}</h3>
+          <div className="quiz-review-tools">
+            <button
+              className="text-link"
+              aria-pressed={flagged.includes(current)}
+              onClick={() =>
+                setFlagged((items) =>
+                  items.includes(current)
+                    ? items.filter((item) => item !== current)
+                    : [...items, current],
+                )
+              }
+            >
+              {flagged.includes(current)
+                ? "Marked for review"
+                : "Mark for review"}
+            </button>
+            {flagged.length > 0 && (
+              <button
+                className="text-link"
+                onClick={() => setCurrent(flagged[0])}
+              >
+                Review marked · {flagged.length}
+              </button>
+            )}
+          </div>
           <fieldset className="quiz-question" disabled={busy || expired}>
             <legend>
               {current + 1}. {question.prompt}
@@ -448,7 +494,10 @@ export default function ReadinessCheck({
                 type="button"
                 aria-label={`Go to question ${index + 1}${answers[index] !== undefined ? ", answered" : ""}`}
                 aria-current={current === index ? "step" : undefined}
-                className={answers[index] !== undefined ? "answered" : ""}
+                className={`${answers[index] !== undefined ? "answered" : ""} ${flagged.includes(index) ? "flagged" : ""}`}
+                title={
+                  flagged.includes(index) ? "Marked for review" : undefined
+                }
                 onClick={() => setCurrent(index)}
                 key={index}
               >
@@ -502,12 +551,7 @@ export default function ReadinessCheck({
       {attempt?.result && !showSetup && (
         <div className="quiz-results">
           <div className="quiz-result-heading">
-            <div
-              className="quiz-score"
-              style={{
-                background: `conic-gradient(#38776d ${(attempt.result.correct / attempt.result.total) * 100}%,#eaf0ec 0)`,
-              }}
-            >
+            <div className="quiz-score">
               <span>
                 <strong>
                   {attempt.result.correct}

@@ -2,11 +2,17 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test } from "vitest";
 import TrainingMap from "../src/features/discovery/TrainingMap";
-test("regional map loads automatically and campus links stay explicit searches", async () => {
+test("regional map loads automatically and campus links open the institution", async () => {
   render(
     <TrainingMap
       location="Kigali, Rwanda"
-      places={[{ name: "Example Nursing School", location: "Kigali" }]}
+      places={[
+        {
+          name: "Example Nursing School",
+          location: "Kigali",
+          url: "https://example.edu/nursing",
+        },
+      ]}
     />,
   );
   const frame = screen.getByTitle("Regional map: Kigali, Rwanda");
@@ -18,7 +24,7 @@ test("regional map loads automatically and campus links stay explicit searches",
     screen
       .getByRole("link", { name: /Example Nursing School/ })
       .getAttribute("href"),
-  ).toContain("maps/search");
+  ).toBe("https://example.edu/nursing");
   expect(screen.getByText(/Confirm each campus/)).toBeTruthy();
 });
 

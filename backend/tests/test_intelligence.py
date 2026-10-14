@@ -253,6 +253,98 @@ def test_fit_uses_cv_signals_and_validated_resources(clients, monkeypatch):
     assert result["deadline"] == "2099-12-31"
 
 
+def test_branch_review_uses_explicitly_requested_saved_evidence(clients, monkeypatch):
+    a, _, _, _ = setup_learner(clients)
+    work = a.get("/api/v1/weeks/1/work").json()
+    note = "I used a loop to transform each row in my example."
+    saved = a.put(
+        "/api/v1/weeks/1/work",
+        json={
+            "checklist": {"learn": True, "build": True, "verify": True},
+            "learning_note": note,
+            "reflection": note,
+            "practice_example": "This should remain private.",
+            "evidence_url": "https://private.example/project",
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    payloads = []
+
+    async def parse(kind, payload, schema):
+        payloads.append(payload)
+        assert kind == "branch-review"
+        assert payload["goal"] == PROFILE["goal"]
+        assert payload["work"]["saved_learning_note"] == note
+        assert len(payload["work"]["actions_completed"]) == 3
+        assert payload["source"]["id"] == work["resource"]["id"]
+        serialized = str(payload)
+        assert "Private Name" not in serialized
+        assert "private.example" not in serialized
+        assert "This should remain private." not in serialized
+        return engine.BranchReviewOutput(
+            recommendation="advance",
+            assessment="Your recorded actions meet this level's success criteria.",
+            evidence_reviewed=["Three actions are checked.", "A learning note is saved."],
+            next_action="Move to the next level.",
+            resources=[
+                engine.ResourceChoice(
+                    resource_id=work["resource"]["id"],
+                    reason="Review the supplied source's examples.",
+                )
+            ],
+        )
+
+    monkeypatch.setattr(engine, "parse_output", parse)
+    response = a.post("/api/v1/pathway/branch-review", json={"week": 1})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["engine"] == "OpenAI"
+    assert result["recommendation"] == "advance"
+    assert "self-reported evidence" in result["notice"]
+    assert result["resources"][0]["resource"]["id"] == work["resource"]["id"]
+    assert len(payloads) == 1
+
+
+def test_branch_review_reports_unconfigured_ai_without_claiming_a_review(clients):
+    a, _, settings, _ = setup_learner(clients)
+    settings.openai_api_key = ""
+    settings.openai_model = ""
+    response = a.post("/api/v1/pathway/branch-review", json={"week": 1})
+    assert response.status_code == 503
+    assert "AI not configured" in response.json()["detail"]
+
+
+def test_branch_review_cannot_advance_without_a_saved_learning_note(
+    clients, monkeypatch
+):
+    a, _, _, _ = setup_learner(clients)
+    assert (
+        a.put(
+            "/api/v1/weeks/1/work",
+            json={
+                "checklist": {"learn": True, "build": True, "verify": True},
+            },
+        ).status_code
+        == 200
+    )
+
+    async def optimistic_model(*_):
+        return engine.BranchReviewOutput(
+            recommendation="advance",
+            assessment="The level is complete.",
+            evidence_reviewed=["All actions are checked."],
+            next_action="Move to the next level.",
+            resources=[],
+        )
+
+    monkeypatch.setattr(engine, "parse_output", optimistic_model)
+    response = a.post("/api/v1/pathway/branch-review", json={"week": 1})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["recommendation"] == "research"
+    assert "learning note" in result["next_action"]
+
+
 def test_candidates_filter_restrictions_before_model():
     profile = {"country": "Rwanda"}
     jobs = [

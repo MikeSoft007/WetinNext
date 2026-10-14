@@ -13,20 +13,31 @@ type Work = {
   checklist: Record<string, boolean>;
   evidence_url: string;
   reflection: string;
+  learning_note?: string;
+  practice_example?: string;
+  open_question?: string;
   updated_at?: string;
 };
 export default function WeekWorkbench({
   week,
   planId,
   status,
+  readOnly = false,
+  compactResponse = false,
+  showSource = true,
+  onSaved,
 }: {
   week: Week;
   planId?: string | null;
   status?: string;
+  readOnly?: boolean;
+  compactResponse?: boolean;
+  showSource?: boolean;
+  onSaved?: () => void;
 }) {
   const [work, setWork] = useState<Work | null>(null),
-    [link, setLink] = useState(""),
     [reflection, setReflection] = useState(""),
+    [ideaExpanded, setIdeaExpanded] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState("");
@@ -39,8 +50,8 @@ export default function WeekWorkbench({
       .then((data) => {
         if (active) {
           setWork(data);
-          setLink(data.evidence_url);
-          setReflection(data.reflection);
+          setReflection(data.learning_note || data.reflection);
+          setIdeaExpanded(false);
         }
       })
       .catch((e) => {
@@ -51,7 +62,7 @@ export default function WeekWorkbench({
     };
   }, [week.week, planId, status]);
   async function save(checklist = work?.checklist, includeEvidence = true) {
-    if (!work || busy) return;
+    if (!work || busy || readOnly) return;
     setBusy(true);
     setError("");
     setMessage("");
@@ -60,12 +71,25 @@ export default function WeekWorkbench({
         method: "PUT",
         body: JSON.stringify({
           checklist,
-          evidence_url: includeEvidence ? link : work.evidence_url,
-          reflection: includeEvidence ? reflection : work.reflection,
+          evidence_url: work.evidence_url,
+          reflection: includeEvidence
+            ? reflection
+            : work.reflection || work.learning_note || "",
+          learning_note: includeEvidence
+            ? reflection
+            : work.learning_note || work.reflection || "",
+          practice_example: work.practice_example || "",
+          open_question: work.open_question || "",
         }),
       });
       setWork(saved);
+      if (includeEvidence) {
+        const idea = saved.learning_note || saved.reflection || reflection;
+        setReflection(idea);
+      }
       setMessage(includeEvidence ? "Your evidence is saved." : "Action saved.");
+      if (includeEvidence) setIdeaExpanded(false);
+      onSaved?.();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -91,6 +115,25 @@ export default function WeekWorkbench({
             {work.coach_advice && (
               <p className="work-coach">{work.coach_advice}</p>
             )}
+            {!compactResponse && (
+              <section
+                className="learning-brief"
+                aria-label="This week's learning brief"
+              >
+                <div className="learning-brief-title">
+                  <span>THIS WEEK’S BUILD</span>
+                  <strong>{week.minutes} min</strong>
+                </div>
+                <p>{week.task}</p>
+                <div className="learning-proof">
+                  <Check size={15} />
+                  <span>
+                    <small>YOU’LL HAVE</small>
+                    <strong>{week.success}</strong>
+                  </span>
+                </div>
+              </section>
+            )}
             <div className="workbench-actions">
               {work.actions.map((action, index) => (
                 <label
@@ -100,7 +143,7 @@ export default function WeekWorkbench({
                   <input
                     type="checkbox"
                     checked={!!work.checklist[action.id]}
-                    disabled={busy}
+                    disabled={busy || readOnly}
                     onChange={(event) =>
                       void save(
                         {
@@ -120,13 +163,16 @@ export default function WeekWorkbench({
                   </span>
                   <span>
                     <strong>{action.title}</strong>
-                    <small>{action.detail}</small>
+                    {!compactResponse && <small>{action.detail}</small>}
                   </span>
                 </label>
               ))}
             </div>
-            {work.resource && (
+            {work.resource && showSource && (
               <div className="work-resource">
+                <span className="public-eyebrow">
+                  START WITH THIS SOURCE · {work.resource.provider}
+                </span>
                 <a
                   className="text-link"
                   href={work.resource.url}
@@ -136,59 +182,88 @@ export default function WeekWorkbench({
                   {work.resource.title}
                   <ArrowUpRight size={14} />
                 </a>
+                {work.resource.sample_exercise && (
+                  <p className="work-resource-exercise">
+                    <strong>Try this:</strong> {work.resource.sample_exercise}
+                  </p>
+                )}
                 <ResourceDetails resource={work.resource} />
               </div>
             )}
-            <details className="work-evidence">
-              <summary>
-                <FileCheck2 size={16} />
-                Keep evidence of your work
-              </summary>
-              <p>
-                A project link or a short note helps you show what you actually
-                did.
-              </p>
-              <label>
-                Project or document link <span>(optional)</span>
-                <input
-                  type="url"
-                  maxLength={1000}
-                  value={link}
-                  onChange={(event) => setLink(event.target.value)}
-                  placeholder="https://…"
-                />
-              </label>
-              <label>
-                What did you build or learn?
-                <textarea
-                  maxLength={2000}
-                  value={reflection}
-                  onChange={(event) => setReflection(event.target.value)}
-                  placeholder="What I tried, what worked, and what I need to practise next…"
-                />
-              </label>
+            <div className="work-evidence idea-callout">
               <button
-                className="secondary"
-                disabled={busy}
-                onClick={() => void save()}
+                type="button"
+                className="idea-callout-bubble"
+                aria-expanded={ideaExpanded}
+                aria-controls={`learning-idea-${week.week}`}
+                disabled={readOnly}
+                onClick={() => setIdeaExpanded((expanded) => !expanded)}
               >
-                {busy ? (
-                  <LoaderCircle size={14} className="spin" />
-                ) : (
-                  <FileCheck2 size={14} />
-                )}
-                Save evidence
+                <FileCheck2 size={15} />
+                <span>
+                  <strong>
+                    {reflection.trim()
+                      ? "Your learning note"
+                      : "Add a learning note"}
+                  </strong>
+                  <small>
+                    {reflection.trim()
+                      ? reflection
+                      : "Keep one useful idea in your own words."}
+                  </small>
+                </span>
+                <span aria-hidden="true">{ideaExpanded ? "−" : "+"}</span>
               </button>
-              <small>
-                Private notes and project links are excluded from AI requests.
-                Saving a checklist does not mark the week complete.
-              </small>
-            </details>
-            {message && (
-              <p className="work-save-status" role="status">
-                {message}
-              </p>
-            )}
+              {ideaExpanded && (
+                <aside
+                  className="idea-callout-panel"
+                  id={`learning-idea-${week.week}`}
+                  aria-label="Learning note editor"
+                >
+                  <label htmlFor={`learning-note-${week.week}`}>
+                    <span className="scratch-label">ONE IDEA TO KEEP</span>
+                    <textarea
+                      id={`learning-note-${week.week}`}
+                      maxLength={1000}
+                      autoFocus
+                      value={reflection}
+                      onChange={(event) => setReflection(event.target.value)}
+                      placeholder="Write one idea you can explain in your own words…"
+                    />
+                  </label>
+                  <small>
+                    Saved notes stay private. They are shared with AI only if
+                    you explicitly ask for a level review.
+                  </small>
+                  <div className="scratchboard-footer">
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => setIdeaExpanded(false)}
+                    >
+                      Collapse note
+                    </button>
+                    <button
+                      className="secondary"
+                      disabled={busy}
+                      onClick={() => void save()}
+                    >
+                      {busy ? (
+                        <LoaderCircle size={14} className="spin" />
+                      ) : (
+                        <FileCheck2 size={14} />
+                      )}
+                      Save note
+                    </button>
+                  </div>
+                </aside>
+              )}
+              {message && (
+                <p className="work-save-status" role="status">
+                  {message}
+                </p>
+              )}
+            </div>
           </>
         )
       )}
@@ -200,6 +275,9 @@ type Evidence = {
   checklist: Record<string, boolean>;
   evidence_url: string;
   reflection: string;
+  learning_note?: string;
+  practice_example?: string;
+  open_question?: string;
   updated_at: string;
 };
 export function EvidencePortfolio({ state }: { state: State | null }) {
@@ -246,33 +324,78 @@ export function EvidencePortfolio({ state }: { state: State | null }) {
         <p role="alert">{error}</p>
       ) : records.length ? (
         <div className="portfolio-grid">
-          {records.map((record) => (
-            <article key={record.week}>
-              <span className="public-eyebrow">WEEK {record.week}</span>
-              <h3>
-                {state?.plan?.weeks.find((w) => w.week === record.week)
-                  ?.title || "Practice evidence"}
-              </h3>
-              <p>
-                {Object.values(record.checklist).filter(Boolean).length}/3
-                actions recorded · Self-reported
-              </p>
-              {record.reflection && (
-                <p className="portfolio-reflection">{record.reflection}</p>
-              )}
-              {record.evidence_url && (
-                <a
-                  className="text-link"
-                  href={record.evidence_url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open my work
-                  <ArrowUpRight size={14} />
-                </a>
-              )}
-            </article>
-          ))}
+          {records.map((record) =>
+            (() => {
+              const note = record.learning_note || record.reflection;
+              const practice = record.practice_example || "";
+              const question = record.open_question || "";
+              return (
+                <article className="portfolio-board-card" key={record.week}>
+                  <div className="portfolio-board-top">
+                    <span className="public-eyebrow">
+                      BOARD NOTE · WEEK {record.week}
+                    </span>
+                    <span className="portfolio-action-count">
+                      {Object.values(record.checklist).filter(Boolean).length}/3
+                      steps
+                    </span>
+                  </div>
+                  <h3>
+                    {state?.plan?.weeks.find((w) => w.week === record.week)
+                      ?.title || "Practice evidence"}
+                  </h3>
+                  {note || practice || question ? (
+                    <div className="portfolio-board-notes">
+                      {note && (
+                        <div className="portfolio-note idea-note">
+                          <small>THE IDEA</small>
+                          <p>{note}</p>
+                        </div>
+                      )}
+                      {practice && (
+                        <div className="portfolio-note example-note">
+                          <small>MY EXAMPLE</small>
+                          <p>{practice}</p>
+                        </div>
+                      )}
+                      {question && (
+                        <div className="portfolio-note question-note">
+                          <small>TO REVISIT</small>
+                          <p>{question}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="portfolio-empty-note">
+                      Add a learning note, example or question from this week’s
+                      workspace to make your progress visible.
+                    </p>
+                  )}
+                  <div className="portfolio-board-footer">
+                    <small>
+                      Saved{" "}
+                      {new Date(record.updated_at).toLocaleDateString(
+                        undefined,
+                        { month: "short", day: "numeric" },
+                      )}{" "}
+                      · learner-recorded
+                    </small>
+                    {record.evidence_url && (
+                      <a
+                        className="text-link"
+                        href={record.evidence_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open my work
+                        <ArrowUpRight size={14} />
+                      </a>
+                    )}
+                  </div>
+                </article>
+              );
+            })(),
+          )}
         </div>
       ) : (
         <p>

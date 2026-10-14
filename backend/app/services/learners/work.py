@@ -1,4 +1,4 @@
-"""Private weekly work: actionable tasks and evidence, kept out of AI requests."""
+"""Private weekly work. Saved notes are only sent for AI review after a learner asks."""
 
 import hashlib
 import json
@@ -64,6 +64,9 @@ def work_for(row, session, week):
         "checklist": saved.get("checklist", {}),
         "evidence_url": saved.get("evidence_url", ""),
         "reflection": saved.get("reflection", ""),
+        "learning_note": saved.get("learning_note", ""),
+        "practice_example": saved.get("practice_example", ""),
+        "open_question": saved.get("open_question", ""),
         "updated_at": saved.get("updated_at"),
         "coach_advice": json.loads(row.progress).get(str(week), {}).get("advice"),
     }

@@ -83,3 +83,11 @@ class LearningPick(Base):
     learner_id: Mapped[str] = mapped_column(String(128), index=True)
     goal_id: Mapped[str] = mapped_column(String(32), index=True)
     payload: Mapped[str] = mapped_column(Text)
+
+
+class LearningBranch(Base):
+    __tablename__ = "learning_branches"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    learner_id: Mapped[str] = mapped_column(String(128), index=True)
+    goal_id: Mapped[str] = mapped_column(String(32), index=True)
+    payload: Mapped[str] = mapped_column(Text)

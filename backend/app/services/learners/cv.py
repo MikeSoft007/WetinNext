@@ -117,7 +117,11 @@ def review(text, goal, opportunity=None, resources=None, goal_skills=None):
                 "detail": "Add a public study reflection, portfolio or project link relevant to your goal. Explain your contribution and exclude private information.",
             }
         )
-    requirements = opportunity.get("skills", []) if opportunity else []
+    goal_track = track_for({"goal": goal})
+    goal_requirements = goal_skills or (
+        TRACKS[goal_track]["skills"] if goal_track != "foundation" else skills_in(goal)
+    )
+    requirements = opportunity.get("skills", []) if opportunity else goal_requirements
     supported = [
         s
         for s in requirements
@@ -156,6 +160,15 @@ def review(text, goal, opportunity=None, resources=None, goal_skills=None):
                 "detail": "Choose an honest example connected to your active learning plan. Distinguish introductory study, work experience and any formal qualifications required.",
             },
         )
+    actions.sort(
+        key=lambda action: (
+            0
+            if action["title"].startswith("Clarify your evidence for ")
+            else 1
+            if action["priority"] == "Your goal"
+            else 2
+        )
+    )
     suggested = sorted(
         [r for r in (resources or []) if set(r.get("skills", [])) & target],
         key=lambda r: len(set(r.get("skills", [])) & target),
@@ -166,6 +179,7 @@ def review(text, goal, opportunity=None, resources=None, goal_skills=None):
         "engine": "explainable text checks",
         "skills": skills,
         "sections": sections,
+        "target_skills": requirements,
         "supported": supported,
         "gaps": gaps,
         "actions": actions,
