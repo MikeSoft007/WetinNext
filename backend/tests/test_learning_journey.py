@@ -28,10 +28,18 @@ def test_profile_sprint_work_discovery_cv_application_and_erasure(clients):
         "checklist": {"learn": True, "build": True, "verify": True},
         "evidence_url": "https://example.com/my-practice",
         "reflection": "Created a fictional business campaign brief and checked my assumptions.",
+        "learning_note": "I learned to define one audience before choosing a message.",
+        "practice_example": "I wrote a campaign brief for a fictional local shop.",
+        "open_question": "How would I compare two audience segments?",
     }
     saved = client.put("/api/v1/weeks/1/work", json=body)
     assert saved.status_code == 200, saved.text
-    assert client.get("/api/v1/weeks/1/work").json()["reflection"] == body["reflection"]
+    restored = client.get("/api/v1/weeks/1/work").json()
+    assert restored["reflection"] == body["reflection"]
+    assert restored["learning_note"] == body["learning_note"]
+    assert restored["practice_example"] == body["practice_example"]
+    assert restored["open_question"] == body["open_question"]
+    assert client.get("/api/v1/me/portfolio").json()[0]["practice_example"] == body["practice_example"]
     assert other.get("/api/v1/me/portfolio").json() == []
     assert other.get("/api/v1/weeks/1/work").status_code == 404
     # Evidence persists across availability adjustments, which do not create another sprint.
@@ -109,6 +117,22 @@ def test_work_rejects_unknown_actions_bad_links_and_invalid_weeks(clients):
             == 422
         )
     assert client.get("/api/v1/me/portfolio").json() == []
+
+
+def test_readiness_counts_new_learning_evidence_fields(clients):
+    client, _, _, _ = clients
+    assert client.put("/api/v1/me/profile", json=PROFILE).status_code == 200
+    note_only = client.put(
+        "/api/v1/weeks/1/work",
+        json={"learning_note": "I learned to group campaign results by audience."},
+    )
+    example_only = client.put(
+        "/api/v1/weeks/2/work",
+        json={"practice_example": "I made a sample chart from fictional results."},
+    )
+    assert note_only.status_code == 200, note_only.text
+    assert example_only.status_code == 200, example_only.text
+    assert client.get("/api/v1/me/readiness").json()["evidence_count"] == 2
 
 
 def test_resource_format_filter_is_honest_and_functional(clients):

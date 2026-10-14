@@ -1,3 +1,5 @@
+import { isDirectSource } from "../../shared/sourceLinks";
+import ReadinessCheck from "../progress/ReadinessCheck";
 import { navigateApp } from "../../app/useSectionRoute";
 import { LocalCollection } from "../../shared/ui/Collection";
 import TrainingMap from "./TrainingMap";
@@ -44,6 +46,9 @@ type Opening = {
   url: string;
   type: string;
   eligibility: string;
+  required_skills?: string[];
+  open_status?: string;
+  deadline?: string | null;
   deadline_note: string;
   availability_note: string;
 };
@@ -57,6 +62,7 @@ type Exam = {
   purpose: string;
 };
 type Guide = {
+  paid_resources?: Source[];
   exams?: Exam[];
   title: string;
   orientation: string;
@@ -80,6 +86,7 @@ type Guide = {
   notice: string;
 };
 type Job = {
+  draft_orientation?: string;
   source_count?: number;
   source_preview?: { url: string; title: string }[];
   status: string;
@@ -104,9 +111,27 @@ export default function GoalResearch({
   refreshToken?: number;
   query?: string;
 }) {
+  const [trainingRoutes, setTrainingRoutes] = useState<Place[]>([]);
+  useEffect(() => {
+    let active = true;
+    setTrainingRoutes([]);
+    if (state?.profile.goal)
+      api<Place[]>(
+        `/training-routes?goal=${encodeURIComponent(state.profile.goal)}&market=${encodeURIComponent(market)}`,
+      )
+        .then((items) => {
+          if (active && Array.isArray(items)) setTrainingRoutes(items);
+        })
+        .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [state?.profile.goal, market]);
   const previousMarket = useRef(market);
   const [picks, setPicks] = useState<LearningPick[]>([]),
     [pickBusy, setPickBusy] = useState("");
+  const [cvSkills, setCvSkills] = useState<string[] | null>(null),
+    [cvSkillError, setCvSkillError] = useState("");
   function domain(url: string) {
     try {
       return new URL(url).hostname.replace(/^www\./, "");
@@ -114,17 +139,42 @@ export default function GoalResearch({
       return "Original source";
     }
   }
+  function sourceKey(value: string) {
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "https:") return null;
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
+      const path = url.pathname.replace(/\/+$/, "") || "/";
+      return `${host}${path}`;
+    } catch {
+      return null;
+    }
+  }
   function citation(url: string) {
+    const key = sourceKey(url);
+    if (!key) return null;
     const index =
-      guide?.sources.findIndex(
-        (source) => source.url.split("?")[0] === url.split("?")[0],
-      ) ?? -1;
+      guide?.sources.findIndex((source) => sourceKey(source.url) === key) ?? -1;
     return index >= 0 ? index + 1 : null;
   }
 
   const goal = state?.profile.goal || "";
   const storageKey = `wetinnext-research:${market}:${goal}`;
   const [showImages, setShowImages] = useState(false);
+  useEffect(() => {
+    const syncView = () => {
+      const view = new URLSearchParams(location.search).get("view");
+      if (
+        view === "plan" ||
+        view === "learn" ||
+        view === "nearby" ||
+        view === "assess"
+      )
+        setTab(view);
+    };
+    window.addEventListener("popstate", syncView);
+    return () => window.removeEventListener("popstate", syncView);
+  }, []);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
   const [education, setEducation] = useState("not_shared"),
     [budget, setBudget] = useState("free_only");
@@ -137,7 +187,11 @@ export default function GoalResearch({
     [tab, setTab] = useState(
       new URLSearchParams(location.search).get("view") === "plan"
         ? "plan"
-        : "learn",
+        : new URLSearchParams(location.search).get("view") === "assess"
+          ? "assess"
+          : new URLSearchParams(location.search).get("view") === "nearby"
+            ? "nearby"
+            : "learn",
     ),
     [confirm, setConfirm] = useState(false),
     [saved, setSaved] = useState(false);
@@ -198,6 +252,37 @@ export default function GoalResearch({
       active = false;
     };
   }, [storageKey, goal, market, refreshToken]);
+  useEffect(() => {
+    let active = true;
+    setCvSkills(null);
+    setCvSkillError("");
+    if (!goal) {
+      setCvSkills([]);
+      return () => {
+        active = false;
+      };
+    }
+    api<{ skills?: string[] }[]>("/me/cv-reviews")
+      .then((reviews) => {
+        if (!Array.isArray(reviews))
+          throw new Error("CV skill review data was not returned.");
+        if (active)
+          setCvSkills(
+            reviews.flatMap((review) =>
+              Array.isArray(review.skills) ? review.skills : [],
+            ),
+          );
+      })
+      .catch((e) => {
+        if (active) {
+          setCvSkillError((e as Error).message);
+          setCvSkills([]);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [goal]);
   useEffect(() => {
     if (!jobId) return;
     let active = true;
@@ -265,6 +350,89 @@ export default function GoalResearch({
   const busy =
     starting || job?.status === "queued" || job?.status === "running";
   const guide = job?.result;
+  const verifiedResources =
+    guide?.resources.filter(
+      (resource) =>
+        isDirectSource(resource.url) && citation(resource.url) !== null,
+    ) ?? [];
+  const researchedPlaces =
+    guide?.places.filter(
+      (place) => isDirectSource(place.url) && citation(place.url) !== null,
+    ) ?? [];
+  const verifiedPlaces = Array.from(
+    new Map(
+      [
+        ...researchedPlaces,
+        ...trainingRoutes.filter((place) => isDirectSource(place.url)),
+      ].map((place) => [place.url, place]),
+    ).values(),
+  );
+  const verifiedOpenings =
+    guide?.opportunities.filter(
+      (opening) =>
+        isDirectSource(opening.url) &&
+        citation(opening.url) !== null &&
+        opening.open_status === "current_open" &&
+        (!opening.deadline ||
+          new Date(`${opening.deadline}T23:59:59Z`).getTime() >= Date.now()),
+    ) ?? [];
+  const matchingResources = verifiedResources.filter(matches);
+  const matchingPlaces = verifiedPlaces.filter(matches);
+  const matchingOpenings = verifiedOpenings.filter(matches);
+  function skillKey(value: string) {
+    return value
+      .toLowerCase()
+      .replace(/[^a-z0-9+#.]+/g, " ")
+      .trim();
+  }
+  const backgroundSignals = [
+    state?.profile.background || "",
+    ...(cvSkills ?? []),
+  ]
+    .map(skillKey)
+    .filter(Boolean);
+  const completedStudySkills = new Set(
+    state?.plan?.research_id === jobId
+      ? (guide?.weeks
+          .filter(
+            (week) => state.progress[String(week.week)]?.status === "done",
+          )
+          .map(
+            (week) =>
+              guide.resources.find(
+                (resource) => resource.id === week.resource_id,
+              )?.skill,
+          )
+          .map((skill) => skillKey(skill || ""))
+          .filter(Boolean) ?? [])
+      : [],
+  );
+  function openingFit(opening: Opening) {
+    const required = [
+      ...new Map(
+        (opening.required_skills ?? [])
+          .filter((skill) => skillKey(skill))
+          .map((skill) => [skillKey(skill), skill]),
+      ).values(),
+    ];
+    const evidenced = required.filter((skill) => {
+      const key = skillKey(skill);
+      return (
+        backgroundSignals.some((signal) => signal.includes(key)) ||
+        completedStudySkills.has(key)
+      );
+    });
+    const missing = required.filter((skill) => !evidenced.includes(skill));
+    return {
+      required,
+      evidenced,
+      missing,
+      percent:
+        required.length && cvSkills !== null
+          ? Math.round((evidenced.length / required.length) * 100)
+          : null,
+    };
+  }
   async function research() {
     setStarting(true);
     setError("");
@@ -474,6 +642,18 @@ export default function GoalResearch({
               </div>
             </>
           )}
+          {job?.draft_orientation &&
+            ["running", "queued"].includes(job.status) && (
+              <section className="research-draft" aria-live="polite">
+                <span className="public-eyebrow">
+                  YOUR GUIDE IS TAKING SHAPE · DRAFT
+                </span>
+                <p>{job.draft_orientation}</p>
+                <small>
+                  Sources and recommendations are still being checked.
+                </small>
+              </section>
+            )}
           <ProcessingProgress
             label="Researching your goal"
             detail="This can take a minute or two. You can leave this page and return."
@@ -555,15 +735,15 @@ export default function GoalResearch({
             <button onClick={() => setTab("learn")}>
               <BookOpen size={22} />
               <span>
-                <strong>{guide.resources.length}</strong>
+                <strong>{verifiedResources.length}</strong>
                 <small>Free learning picks</small>
               </span>
               <ArrowUpRight size={15} />
             </button>
-            <button onClick={() => setTab("nearby")}>
+            <button onClick={() => setTab("learn")}>
               <GraduationCap size={23} />
               <span>
-                <strong>{guide.places.length}</strong>
+                <strong>{verifiedPlaces.length}</strong>
                 <small>Training places to explore</small>
               </span>
               <ArrowUpRight size={15} />
@@ -577,20 +757,48 @@ export default function GoalResearch({
               <ArrowUpRight size={15} />
             </button>
           </div>
+          {state?.plan?.research_id !== jobId && (
+            <div className="research-start-plan">
+              <span>Ready to turn this guide into weekly action?</span>
+              <button
+                className="primary"
+                disabled={saving}
+                onClick={() => {
+                  setTab("plan");
+                  if (state?.plan) setConfirm(true);
+                  else void adopt();
+                }}
+              >
+                Start this learning plan <ArrowRight size={15} />
+              </button>
+            </div>
+          )}
+          {state?.plan?.research_id === jobId && (
+            <button
+              className="primary"
+              onClick={() => navigateApp("/app/progress?view=plan")}
+            >
+              Continue & extend your plan <ArrowRight size={15} />
+            </button>
+          )}
           <nav className="research-tabs" aria-label="Guide sections">
             {[
-              ["learn", `Learn · ${guide.resources.length}`],
               [
-                "nearby",
-                `Schools & opportunities · ${guide.places.length + guide.opportunities.length}`,
+                "learn",
+                `Learn & schools · ${verifiedResources.length + verifiedPlaces.length}`,
               ],
+              ["nearby", `Opportunities · ${verifiedOpenings.length}`],
               ["plan", "Your four weeks"],
-              ["assess", "Assess your next step"],
             ].map(([id, label]) => (
               <button
                 key={id}
                 aria-pressed={tab === id}
-                onClick={() => setTab(id)}
+                onClick={() => {
+                  setTab(id);
+                  navigateApp(`/app/discover?view=${id}`, {
+                    preserveScroll: true,
+                  });
+                }}
               >
                 {label}
               </button>
@@ -598,13 +806,36 @@ export default function GoalResearch({
           </nav>
           {tab === "learn" && (
             <div className="research-learning">
-              {guide.resources.filter(matches).map((source, index) => (
+              {(guide.paid_resources ?? [])
+                .filter(
+                  (source) => isDirectSource(source.url) && matches(source),
+                )
+                .map((source) => (
+                  <article className="paid-learning-row" key={source.id}>
+                    <div>
+                      <span className="response-cost-tag">Paid</span>
+                      <span className="eyebrow">
+                        {source.provider} · {source.format}
+                      </span>
+                      <h3>
+                        <a href={source.url} target="_blank" rel="noreferrer">
+                          {source.title} <ArrowUpRight size={15} />
+                        </a>
+                      </h3>
+                      <p>{source.why_it_fits}</p>
+                      <small>{source.access_note}</small>
+                    </div>
+                  </article>
+                ))}
+
+              {matchingResources.map((source, index) => (
                 <article key={source.id}>
                   <span className="research-number">
                     <BookOpen size={23} strokeWidth={1.4} />
                     <small>{String(index + 1).padStart(2, "0")}</small>
                   </span>
                   <div>
+                    <span className="response-cost-tag">Free</span>
                     <span className="eyebrow">
                       {source.provider} · {source.format}
                     </span>
@@ -639,7 +870,7 @@ export default function GoalResearch({
                         {picks.some((pick) => pick.url === source.url) ? (
                           <>
                             <Check size={14} />
-                            Saved to Today
+                            Saved to Progress
                           </>
                         ) : (
                           <>
@@ -656,22 +887,56 @@ export default function GoalResearch({
                   </div>
                 </article>
               ))}
+              {verifiedResources.length > 0 &&
+                matchingResources.length === 0 && (
+                  <p role="status">
+                    No learning picks match this search. Clear or change the
+                    Discover search to see all {verifiedResources.length}{" "}
+                    verified picks.
+                  </p>
+                )}
             </div>
           )}
-          {tab === "nearby" && (
+          {tab === "learn" && (
             <div className="research-nearby">
               <header>
                 <h3>
-                  Explore training near{" "}
+                  Explore training for{" "}
                   {guide.location || "your chosen location"}
                 </h3>
-                <p>Check current intake dates with each institution.</p>
+                <p>
+                  {verifiedPlaces.length} training routes ·{" "}
+                  {verifiedOpenings.length} confirmed openings. Training pages
+                  do not guarantee a current intake; confirm dates with the
+                  institution.
+                </p>
               </header>
-              {guide.places.length ? (
+              {!verifiedPlaces.length && !verifiedOpenings.length && (
+                <div className="research-empty" role="status">
+                  <h3>Broaden the search for this goal</h3>
+                  <p>
+                    No sourced training route or current call was saved in this
+                    guide. Search again to check related programmes across your
+                    selected country.
+                  </p>
+                  <button
+                    className="secondary"
+                    disabled={
+                      starting ||
+                      job?.status === "running" ||
+                      job?.status === "queued"
+                    }
+                    onClick={() => void research()}
+                  >
+                    Search schools & opportunities again
+                  </button>
+                </div>
+              )}
+              {matchingPlaces.length ? (
                 <LocalCollection
-                  items={guide.places.filter(matches)}
+                  items={matchingPlaces}
                   label="training places"
-                  pageSize={2}
+                  pageSize={6}
                   searchable={false}
                 >
                   {(visible) =>
@@ -711,14 +976,6 @@ export default function GoalResearch({
                               Institution website
                               <ArrowUpRight size={14} />
                             </a>
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + " " + place.location)}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <MapPin size={14} />
-                              Find on map
-                            </a>
                           </div>
                           <details>
                             <summary>Costs, admissions & recognition</summary>
@@ -731,25 +988,43 @@ export default function GoalResearch({
                     ))
                   }
                 </LocalCollection>
+              ) : verifiedPlaces.length > 0 ? (
+                <p role="status">
+                  No training places match this search. Clear or change the
+                  Discover search to see all {verifiedPlaces.length} verified
+                  institutions.
+                </p>
               ) : (
                 <p>
-                  No sufficiently sourced local training institutions found. Try
-                  a nearby city or broader region.
+                  No directly sourced institution pages were verified for this
+                  location. Try a nearby city or broader region; search-result
+                  pages are not shown as institution links.
                 </p>
               )}
-              <TrainingMap
-                location={guide.location || market}
-                places={guide.places}
-                market={market}
-              />
+              {verifiedPlaces.length > 0 && (
+                <TrainingMap
+                  location={guide.location || market}
+                  places={verifiedPlaces}
+                  market={market}
+                />
+              )}
+            </div>
+          )}
+          {tab === "nearby" && (
+            <div className="research-nearby">
               <h3 className="research-openings-title">
                 Current opportunities to investigate
               </h3>
-              {guide.opportunities.length ? (
+              <p className="opportunity-source-limit-note">
+                Up to five direct-source calls per guide. We omit expired,
+                undated or older-than-90-day calls without a future deadline,
+                and search-result pages.
+              </p>
+              {matchingOpenings.length ? (
                 <LocalCollection
-                  items={guide.opportunities.filter(matches)}
+                  items={matchingOpenings}
                   label="opportunities"
-                  pageSize={3}
+                  pageSize={6}
                   searchable={false}
                 >
                   {(visible) =>
@@ -758,33 +1033,89 @@ export default function GoalResearch({
                         className="research-opening"
                         key={opening.url + opening.title}
                       >
-                        <span className="eyebrow">
-                          {opening.type} · {opening.location}
-                        </span>
-                        <h3>
-                          <a
-                            href={opening.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {opening.title}
-                            <ArrowUpRight size={15} />
-                          </a>
-                        </h3>
-                        <p>
-                          {opening.provider} · {opening.eligibility}
-                        </p>
-                        <small>
-                          {opening.deadline_note} · {opening.availability_note}
-                        </small>
+                        {(() => {
+                          const fit = openingFit(opening);
+                          return (
+                            <>
+                              <div className="research-opening-heading">
+                                <span className="eyebrow">
+                                  {opening.type} · {opening.location}
+                                </span>
+                                <span
+                                  className="opportunity-fit-tag"
+                                  title="Evidence coverage is not a job-readiness prediction."
+                                >
+                                  {fit.percent === null
+                                    ? cvSkills === null
+                                      ? "Checking skill evidence…"
+                                      : "Skills not listed"
+                                    : `${fit.percent}% skill evidence`}
+                                </span>
+                              </div>
+                              <h3>
+                                <a
+                                  href={opening.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {opening.title}
+                                  <ArrowUpRight size={15} />
+                                </a>
+                              </h3>
+                              <p>
+                                {opening.provider} · {opening.eligibility}
+                              </p>
+                              <small>
+                                {opening.deadline_note} ·{" "}
+                                {opening.availability_note}
+                              </small>
+                              <div
+                                className="opportunity-fit-guidance"
+                                role="note"
+                              >
+                                <strong>Recommended preparation</strong>
+                                <p>
+                                  {fit.required.length === 0
+                                    ? "This listing does not state specific skills. Compare its eligibility and responsibilities with your background, then confirm details with the provider."
+                                    : fit.missing.length
+                                      ? `Practise ${fit.missing.join(", ")} in a small project and add honest evidence of your contribution to your CV.`
+                                      : `Your available records mention the listed skills. Add a concrete example to your CV and confirm eligibility with the provider.`}
+                                </p>
+                                {fit.required.length > 0 && (
+                                  <small>
+                                    {fit.evidenced.length} of{" "}
+                                    {fit.required.length} skills named by the
+                                    listing appear in your profile, CV skill
+                                    mentions or completed guide practice. This
+                                    is evidence coverage, not a readiness or
+                                    hiring prediction.
+                                  </small>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </article>
                     ))
                   }
                 </LocalCollection>
+              ) : verifiedOpenings.length > 0 ? (
+                <p role="status">
+                  No opportunities match this search. Clear or change the
+                  Discover search to see all {verifiedOpenings.length} verified
+                  opportunities.
+                </p>
               ) : (
                 <p>
-                  No current openings found. Check the institutions for upcoming
-                  intakes.
+                  No directly sourced current openings were verified. Check
+                  official institution and employer pages for new calls.
+                </p>
+              )}
+              {cvSkillError && (
+                <p className="opportunity-evidence-notice" role="status">
+                  CV skill mentions could not be loaded, so the percentages
+                  exclude CV evidence and use only your profile and completed
+                  guide practice.
                 </p>
               )}
             </div>
@@ -810,42 +1141,56 @@ export default function GoalResearch({
                   <small>Confirm formal requirements</small>
                 </span>
               </div>
-              <h3>Choose your next check</h3>
-              <p>Find learning gaps, then check the formal requirements.</p>
-              <a
-                className="text-link"
-                href="/app/progress?view=practice#practice-check"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigateApp("/app/progress?view=practice#practice-check");
-                }}
-              >
-                Open my in-app practice & evidence check ↗
-              </a>
-              {guide.exams?.length ? (
-                guide.exams.filter(matches).map((exam) => (
-                  <article key={exam.url}>
-                    <span className="eyebrow">
-                      {exam.provider} · {exam.cost_type}
-                    </span>
-                    <h3>
-                      <a href={exam.url} target="_blank" rel="noreferrer">
-                        {exam.title} ↗
-                      </a>
-                    </h3>
-                    <p>{exam.cost_note}</p>
-                    <details>
-                      <summary>Purpose & entry requirements</summary>
-                      <p>{exam.purpose}</p>
-                      <small>{exam.prerequisites}</small>
-                    </details>
+              <ReadinessCheck state={state} onUpdated={onSaved} />
+              <details className="assessment-eligibility">
+                <summary>Formal training & eligibility</summary>
+                <p>{guide.qualification_route}</p>
+                {verifiedPlaces.slice(0, 2).map((place) => (
+                  <article key={place.url}>
+                    <strong>{place.name}</strong>
+                    <p>{place.entry_route}</p>
+                    <a href={place.url} target="_blank" rel="noreferrer">
+                      Confirm requirements with the institution
+                      <ArrowUpRight size={14} />
+                    </a>
                   </article>
-                ))
+                ))}
+              </details>
+              <h3>External assessments</h3>
+              {guide.exams?.some(
+                (exam) =>
+                  isDirectSource(exam.url) && citation(exam.url) !== null,
+              ) ? (
+                guide.exams
+                  .filter(
+                    (exam) =>
+                      isDirectSource(exam.url) &&
+                      citation(exam.url) !== null &&
+                      matches(exam),
+                  )
+                  .map((exam) => (
+                    <article key={exam.url}>
+                      <span className="eyebrow">
+                        {exam.provider} · {exam.cost_type}
+                      </span>
+                      <h3>
+                        <a href={exam.url} target="_blank" rel="noreferrer">
+                          {exam.title} ↗
+                        </a>
+                      </h3>
+                      <p>{exam.cost_note}</p>
+                      <details>
+                        <summary>Purpose & entry requirements</summary>
+                        <p>{exam.purpose}</p>
+                        <small>{exam.prerequisites}</small>
+                      </details>
+                    </article>
+                  ))
               ) : (
                 <p>
-                  No sourced exam options in this saved guide. Refine this
-                  search to look for current free practice, paid exams or
-                  flexible options.
+                  No directly sourced external assessment was verified for this
+                  goal. Use the practice check above, then confirm formal
+                  requirements with the institution or regulator.
                 </p>
               )}
             </div>

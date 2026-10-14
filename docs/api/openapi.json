@@ -538,6 +538,57 @@
         }
       }
     },
+    "/api/v1/pathway/branch-review": {
+      "post": {
+        "tags": [
+          "Matching"
+        ],
+        "summary": "Branch Review",
+        "operationId": "branch_review_api_v1_pathway_branch_review_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Branch Review Api V1 Pathway Branch Review Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v1/applications/{oid}": {
       "put": {
         "tags": [
@@ -2673,6 +2724,323 @@
         }
       }
     },
+    "/api/v1/me/branches": {
+      "get": {
+        "tags": [
+          "Learning branches"
+        ],
+        "summary": "Branches",
+        "operationId": "branches_api_v1_me_branches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Learning branches"
+        ],
+        "summary": "Add Branch",
+        "operationId": "add_branch_api_v1_me_branches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningBranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me/branches/{branch_id}": {
+      "patch": {
+        "tags": [
+          "Learning branches"
+        ],
+        "summary": "Update Branch",
+        "operationId": "update_branch_api_v1_me_branches__branch_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "branch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningBranchUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/careers": {
+      "get": {
+        "tags": [
+          "Career bank"
+        ],
+        "summary": "Career Bank",
+        "operationId": "career_bank_api_v1_careers_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Refresh"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/journey": {
+      "get": {
+        "tags": [
+          "Career journey"
+        ],
+        "summary": "Career Journey",
+        "operationId": "career_journey_api_v1_me_journey_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-routes": {
+      "get": {
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "Training Routes",
+        "operationId": "training_routes_api_v1_training_routes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "goal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "default": "",
+              "title": "Goal"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Nigeria",
+                "Rwanda",
+                "Global"
+              ],
+              "type": "string",
+              "default": "Rwanda",
+              "title": "Market"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/session": {
       "get": {
         "tags": [
@@ -2865,6 +3233,21 @@
         ],
         "title": "ApplicationUpdate"
       },
+      "BranchReviewRequest": {
+        "properties": {
+          "week": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Week"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week"
+        ],
+        "title": "BranchReviewRequest"
+      },
       "CVUpload": {
         "properties": {
           "filename": {
@@ -3041,6 +3424,47 @@
           "metrics"
         ],
         "title": "LearnerState"
+      },
+      "LearningBranchRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 3,
+            "title": "Title"
+          },
+          "task": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Task"
+          },
+          "resource_id": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Resource Id",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "task"
+        ],
+        "title": "LearningBranchRequest"
+      },
+      "LearningBranchUpdate": {
+        "properties": {
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "completed"
+        ],
+        "title": "LearningBranchUpdate"
       },
       "LearningPickRequest": {
         "properties": {
@@ -3827,6 +4251,46 @@
       },
       "Resource": {
         "properties": {
+          "price_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Amount"
+          },
+          "price_currency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "USD",
+                  "NGN",
+                  "RWF"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Currency"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
           "data_usage": {
             "type": "string",
             "title": "Data Usage",
@@ -4035,6 +4499,24 @@
             "type": "string",
             "maxLength": 2000,
             "title": "Reflection",
+            "default": ""
+          },
+          "learning_note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Learning Note",
+            "default": ""
+          },
+          "practice_example": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Practice Example",
+            "default": ""
+          },
+          "open_question": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Open Question",
             "default": ""
           }
         },

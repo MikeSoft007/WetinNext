@@ -225,6 +225,8 @@ def readiness(row: Learner = Depends(learner), session: Session = Depends(db)):
             bool(
                 json.loads(r.payload).get("reflection")
                 or json.loads(r.payload).get("evidence_url")
+                or json.loads(r.payload).get("learning_note")
+                or json.loads(r.payload).get("practice_example")
             )
             for r in evidence
         ),

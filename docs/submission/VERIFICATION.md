@@ -1,6 +1,6 @@
 # Verification
 
-Current verification date: 13 October 2026. Automated checks verify implementation behavior; they are not evidence of validated educational outcomes, independent source fact-checking or production scalability.
+Current verification date: 14 October 2026. Automated checks verify implementation behavior; they are not evidence of validated educational outcomes, independent source fact-checking or production scalability.
 
 ## Reproduce
 
@@ -37,8 +37,8 @@ The backend suites cover roles and identity, goal history, CV handling, source r
 
 The `.github/workflows/ci.yml` file defines automated checks for upload. A successful local run is not presented as a successful remote CI run. Final local verification after reorganization:
 
-- **111 backend tests passed.** One existing Starlette/httpx deprecation warning remains.
-- **30 frontend workflow tests passed.** jsdom reports its unsupported `scrollTo` method; route assertions still pass.
+- **127 backend tests passed.** One existing Starlette/httpx deprecation warning remains.
+- **45 frontend workflow tests passed.** jsdom reports its unsupported `scrollTo` method; route assertions still pass.
 - **Production build and Prettier formatting checks passed.**
 - **No missing local Markdown link targets.**
 - Frontend source imports and test mock paths were updated after feature-folder moves; five unused legacy components were removed.

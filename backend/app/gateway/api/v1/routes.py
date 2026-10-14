@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, APIKeyCookie
 from app.contracts.schemas import (
     Profile,
     CheckIn,
+    BranchReviewRequest,
     ApplicationUpdate,
     ProfileAdjustment,
     Resource,
@@ -113,6 +114,17 @@ async def opportunity(oid: str, request: Request):
 )
 async def assessment(oid: str, request: Request):
     return await forward("matching", f"/opportunities/{oid}/assessment", request)
+
+
+@router.post("/pathway/branch-review", tags=["Matching"], response_model=dict)
+async def branch_review(data: BranchReviewRequest, request: Request):
+    return await forward(
+        "matching",
+        "/pathway/branch-review",
+        request,
+        "POST",
+        data.model_dump(),
+    )
 
 
 @router.put("/applications/{oid}", tags=["Applications"], response_model=dict)
@@ -469,4 +481,61 @@ async def learning_pick_save(body: LearningPickRequest, request: Request):
 async def learning_pick_update(pid: str, body: LearningPickUpdate, request: Request):
     return await forward(
         "learner", f"/me/learning-picks/{pid}", request, "PATCH", body.model_dump()
+    )
+
+
+from app.contracts.schemas import LearningBranchRequest, LearningBranchUpdate
+
+
+@router.get("/me/branches", tags=["Learning branches"])
+async def branches(request: Request):
+    return await forward("learner", "/me/branches", request)
+
+
+@router.post("/me/branches", tags=["Learning branches"])
+async def add_branch(data: LearningBranchRequest, request: Request):
+    return await forward("learner", "/me/branches", request, "POST", data.model_dump())
+
+
+@router.patch("/me/branches/{branch_id}", tags=["Learning branches"])
+async def update_branch(branch_id: str, data: LearningBranchUpdate, request: Request):
+    return await forward(
+        "learner", f"/me/branches/{branch_id}", request, "PATCH", data.model_dump()
+    )
+
+
+@router.get("/careers", tags=["Career bank"])
+async def career_bank(
+    request: Request,
+    q: str = Query(default="", max_length=100),
+    page: int = Query(default=1, ge=1, le=1000),
+    refresh: bool = False,
+):
+    from urllib.parse import urlencode
+
+    return await forward(
+        "catalog",
+        "/careers?"
+        + urlencode({"q": q, "page": page, "refresh": str(refresh).lower()}),
+        request,
+    )
+
+
+@router.get("/me/journey", tags=["Career journey"])
+async def career_journey(request: Request, page: int = Query(default=1, ge=1)):
+    return await forward("learner", f"/me/journey?page={page}", request)
+
+
+@router.get("/training-routes", tags=["Catalogue"])
+async def training_routes(
+    request: Request,
+    goal: str = Query(default="", max_length=200),
+    market: Literal["Nigeria", "Rwanda", "Global"] = "Rwanda",
+):
+    from urllib.parse import urlencode
+
+    return await forward(
+        "catalog",
+        "/training-routes?" + urlencode({"goal": goal, "market": market}),
+        request,
     )

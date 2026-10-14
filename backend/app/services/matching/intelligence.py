@@ -9,6 +9,7 @@ import time
 from collections import OrderedDict
 from datetime import date
 from pydantic import BaseModel, Field
+from typing import Literal
 from openai import AsyncOpenAI
 from app.core.config import settings
 from app.core.skills import skills_in, track_for
@@ -60,6 +61,14 @@ class FitOutput(BaseModel):
     minutes: int = Field(ge=1, le=1200)
     explanation: str = Field(min_length=1, max_length=700)
     next_actions: list[str] = Field(min_length=1, max_length=3)
+    resources: list[ResourceChoice] = Field(max_length=2)
+
+
+class BranchReviewOutput(BaseModel):
+    recommendation: Literal["advance", "research"]
+    assessment: str = Field(min_length=1, max_length=600)
+    evidence_reviewed: list[str] = Field(max_length=4)
+    next_action: str = Field(min_length=1, max_length=400)
     resources: list[ResourceChoice] = Field(max_length=2)
 
 
@@ -234,6 +243,14 @@ def validate_choices(output, resources, opportunities, hours):
         return
     rids = {r["id"] for r in resources}
     oids = {o["id"] for o in opportunities}
+    if isinstance(output, BranchReviewOutput):
+        selected_resources = [r.resource_id for r in output.resources]
+        if len(selected_resources) != len(set(selected_resources)) or any(
+            rid not in rids for rid in selected_resources
+        ):
+            raise ValueError("Unknown or duplicate resource")
+        validate_text(output.model_dump())
+        return
     selected_resources = [r.resource_id for r in output.resources]
     if len(selected_resources) != len(set(selected_resources)) or any(
         rid not in rids for rid in selected_resources
@@ -267,6 +284,8 @@ async def parse_output(kind, payload, schema):
                 if kind == "intent"
                 else "\nCreate one connected goal bundle. Select courses for specific role requirements or missing evidence, not generic productivity. Explain focus, a concrete deliverable this week, and rationale using the learner's actual background, time and device. Link each opportunity to a resource addressing its named gap; use null if no suitable resource exists. State no matches when catalogue coverage is absent. Do not confuse data centres with data analytics."
                 if kind == "discovery"
+                else "\nReview one learning-path level against the learner's stated goal. Treat saved notes and checked actions as self-reported evidence, not verified mastery. Recommend 'advance' only when the work clearly addresses the level's success criteria and the recorded actions are complete; otherwise recommend 'research' with one specific, achievable follow-up. Keep the recommendation supportive and do not judge ability from missing or short notes. Mention only evidence present in the supplied payload. Recommend only supplied resources by ID, at most two, and no URLs."
+                if kind == "branch-review"
                 else "\nExplain this selected opportunity using learner evidence and uncertainty; give at most three preparation actions and supporting resources."
             ),
             input=json.dumps(payload, ensure_ascii=False),
@@ -601,4 +620,117 @@ async def opportunity_fit(opportunity, learner, reviews, resources):
         **base,
         **engine_status(unavailable),
         "notice": unavailable + ". Showing basic evidence checks.",
+    }
+
+
+async def review_branch(learner, work, catalogue_resources):
+    plan = learner.get("plan") or {}
+    goal = (learner.get("profile") or {}).get("goal", "").strip()
+    week = next(
+        (item for item in plan.get("weeks", []) if item["week"] == work["week"]),
+        None,
+    )
+    if not goal or not week:
+        raise ValueError("A saved goal and matching pathway level are required.")
+
+    resources_by_id = {
+        item["id"]: item
+        for item in [*catalogue_resources, *plan.get("resources", [])]
+        if item.get("id")
+    }
+    resource = resources_by_id.get(week["resource_id"])
+    resources = ([resource] if resource else []) + [
+        item
+        for item in plan.get("resources", [])
+        if item.get("id") != week["resource_id"]
+    ][:4]
+    completed_actions = [
+        action["title"]
+        for action in work.get("actions", [])
+        if work.get("checklist", {}).get(action["id"])
+    ]
+    learning_note = (
+        work.get("learning_note") or work.get("reflection") or ""
+    ).strip()
+    opportunities = [
+        {
+            "title": item.get("title", "")[:160],
+            "skills": (item.get("required_skills") or [])[:8],
+        }
+        for item in (plan.get("research_guide") or {}).get("opportunities", [])[:4]
+    ]
+    payload = {
+        "goal": goal[:500],
+        "level": {
+            "week": work["week"],
+            "title": week["title"][:160],
+            "task": week["task"][:700],
+            "success_criteria": week["success"][:500],
+        },
+        "work": {
+            "actions_completed": completed_actions,
+            "actions_total": len(work.get("actions", [])),
+            "saved_learning_note": learning_note[:1000],
+        },
+        "source": (
+            {
+                "id": resource["id"],
+                "title": resource["title"][:160],
+                "provider": resource["provider"][:120],
+                "skills": (resource.get("skills") or [])[:8],
+            }
+            if resource
+            else None
+        ),
+        "available_goal_resources": [
+            {
+                "id": item["id"],
+                "title": item["title"][:160],
+                "provider": item["provider"][:120],
+                "skills": (item.get("skills") or [])[:8],
+            }
+            for item in resources
+        ],
+        "goal_related_opportunity_context": opportunities,
+    }
+    if fallback_reason():
+        raise GuidanceCooldown(fallback_reason())
+    output, cached = await reason(
+        "branch-review",
+        payload,
+        BranchReviewOutput,
+        resources,
+        [],
+        (learner.get("profile") or {}).get("hours", 1),
+    )
+    if output.recommendation == "advance" and (
+        len(completed_actions) < len(work.get("actions", [])) or not learning_note
+    ):
+        output = output.model_copy(
+            update={
+                "recommendation": "research",
+                "next_action": (
+                    "Save one learning note in your own words before advancing."
+                    if learning_note == ""
+                    else "Finish the remaining checked actions before advancing."
+                ),
+                "resources": [],
+            }
+        )
+    resource_map = {item["id"]: item for item in resources}
+    return {
+        **engine_status(),
+        "cached": cached,
+        "recommendation": output.recommendation,
+        "assessment": output.assessment,
+        "evidence_reviewed": output.evidence_reviewed,
+        "next_action": output.next_action,
+        "resources": [
+            {
+                "resource": resource_map[item.resource_id],
+                "reason": item.reason,
+            }
+            for item in output.resources
+        ],
+        "notice": "AI reviewed your goal, level, checked actions, saved learning note and supplied goal-related sources. Your note is self-reported evidence, not verified mastery.",
     }

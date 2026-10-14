@@ -21,9 +21,11 @@ The project concept and learner requirements came from the project owner. Codex 
 
 - Multiple saved goals with independent plans, weekly progress and evidence.
 - Remembered learning picks with Saved/Reading/Read states and a Today resume view.
-- Web-researched learning guides beyond the admin catalogue, with traceable sources and location scope.
+- Weekly workspaces pair the cited resource with a concrete exercise and success artifact; a private notepad expands when selected to capture an idea, while practice examples and open questions remain available as optional evidence for the Progress portfolio.
+- The learner workspace has three core tabs: Discover researches the active goal, compares free and optional paid sources, institutions and evidenced openings, then offers a four-week starter plan; Progress resumes reading, records work/skill evidence and practice checks, and extends learning through optional goal-scoped branches; Review compares uploaded CVs or pasted résumé/website content with the active goal. A location dropdown scopes Nigeria, Rwanda or Global research. Streamed draft orientation is displayed through polling as the model generates it; links remain hidden until source validation finishes. This is a starter pathway, not a promise of qualification or employment. Website URLs alone are not fetched or reviewed.
+- Web-researched learning guides beyond the admin catalogue, with citation-checked direct source links and location scope. Each guide returns at most five local providers and five current calls; opportunities without dated current evidence are omitted. Opportunity cards compare source-listed skills with CV/profile mentions and completed guide practice as evidence coverage, not a readiness or hiring prediction.
 - Four-week introductory plans, weekly work and check-ins; unsupported goals do not receive unrelated computing templates.
-- Configurable practice quizzes: 1–20 questions, three difficulty levels, optional timer, answer comparison and cited lesson links.
+- Configurable practice quizzes: 1–20 questions, three difficulty levels, optional timer, answer comparison and cited lesson links. The guide's assessment tab keeps the readiness and practice entry visible before and after a researched plan is saved.
 - A preparation signal map, CV feedback, application preparation tracking and per-goal in-app focus reminders.
 - Separate learner/admin roles, persistent local demo accounts, account-data deletion and versioned REST APIs.
 - Curated catalogue imports, freshness checks, publication gates and explicit AI fallback/error states.
@@ -139,3 +141,9 @@ npm --prefix web run format:check
 ## Proof-of-concept boundaries
 
 English-first; Nigerian Pidgin, French and other languages are future work. Maps show regional context, not verified institution pins. Reminders are in-app, not background email/push. Telegram is a future phone-based check-in and guidance feature. Its polling adapter is a scaffold; live account linking and delivery are not yet implemented or verified. LinkedIn support is a goal-specific search/review bridge, not a scraping or bulk-ingestion integration. Research and quizzes require available model access; AI-generated practice is not a validated exam. See the [full reviewer guide](docs/README.md) for details.
+
+### Career bank and journey records
+
+Discover includes a searchable, paginated career bank backed by the European Commission ESCO classification. The live API returned 2,942 occupation profiles in the verified default search. Definitions and core skills are occupational references; local education/licensing and current vacancies are separately researched for the learner’s goal and market. The catalogue service caches bounded pages and can reuse a cached page during an upstream failure; this cache is in memory and does not provide offline access after restart.
+
+Progress’s Journey log records active-goal work, check-ins, completed practice checks, experience reviews and optional branches. Work/practice records refer to the current sprint; reviews and check-ins are goal-scoped. This is evidence and self-reported activity, not a certified competence score.

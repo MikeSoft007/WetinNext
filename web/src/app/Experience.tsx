@@ -85,14 +85,8 @@ export default function Experience() {
         <AdminWorkspace />
       </RoleGate>
     );
-  if (path === "/cv")
-    return (
-      <LearnerGate go={go}>
-        <CVWorkspace />
-      </LearnerGate>
-    );
   if (path === "/reset-password") return <ResetPassword go={go} />;
-  if (path === "/app" || path.startsWith("/app/"))
+  if (path === "/cv" || path === "/app" || path.startsWith("/app/"))
     return (
       <LearnerGate go={go}>
         <App

@@ -393,3 +393,115 @@ def test_quiz_rejects_uncited_and_broad_directory_links(clients, monkeypatch):
         with pytest.raises(HTTPException) as exc:
             asyncio.run(quizzes.build(body, owner="test"))
         assert exc.value.status_code == 503
+        assert "did not match the verified lesson sources" in exc.value.detail
+
+
+def test_quiz_reports_missing_lesson_citations_safely(clients, monkeypatch, caplog):
+    import asyncio
+    import pytest
+    from fastapi import HTTPException
+    from app.contracts.schemas import QuizBuild
+
+    _, _, settings, _ = clients
+    settings.openai_api_key = "mock"
+    settings.openai_model = "mock"
+
+    class NoSourcesAI:
+        def __init__(self, **kwargs):
+            self.responses = self
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def create(self, **kwargs):
+            return SimpleNamespace(
+                output_text="No source citations found.",
+                model_dump=lambda: {"output": []},
+            )
+
+    monkeypatch.setattr(quizzes, "AsyncOpenAI", NoSourcesAI)
+    body = QuizBuild(
+        goal="Learn anatomy",
+        question_count=1,
+        resources=[
+            {
+                "id": "source",
+                "url": "https://example.edu/anatomy",
+                "title": "Anatomy",
+            }
+        ],
+    )
+    with caplog.at_level("WARNING", logger="app.services.matching.quizzes"):
+        with pytest.raises(HTTPException) as exc:
+            asyncio.run(quizzes.build(body, owner="test"))
+
+    assert exc.value.status_code == 503
+    assert "did not return a verifiable lesson" in exc.value.detail
+    assert "ValueError" in caplog.text
+    assert "No source citations found" not in caplog.text
+
+
+def test_quiz_repairs_resource_id_for_verified_lesson(clients, monkeypatch):
+    import asyncio
+    from app.contracts.schemas import QuizBuild
+
+    _, _, settings, _ = clients
+    settings.openai_api_key = "mock"
+    settings.openai_model = "mock"
+
+    class WrongResourceAI:
+        def __init__(self, **kwargs):
+            self.responses = self
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def create(self, **kwargs):
+            return lesson_response()
+
+        async def parse(self, **kwargs):
+            return SimpleNamespace(
+                output_parsed=quizzes.Quiz(
+                    title="Practice",
+                    questions=[
+                        quizzes.Question(
+                            prompt="Concept?",
+                            options=["A", "B", "C", "D"],
+                            correct=0,
+                            explanation="Theory.",
+                            source_id="incorrect-resource",
+                            source_url="https://example.edu/anatomy/lesson",
+                            source_title="Lesson",
+                        )
+                    ],
+                )
+            )
+
+    monkeypatch.setattr(quizzes, "AsyncOpenAI", WrongResourceAI)
+    result = asyncio.run(
+        quizzes.build(
+            QuizBuild(
+                goal="Learn anatomy",
+                question_count=1,
+                resources=[
+                    {
+                        "id": "anatomy-source",
+                        "url": "https://example.edu/anatomy",
+                        "title": "Anatomy",
+                    }
+                ],
+            ),
+            owner="test",
+        )
+    )
+
+    assert result["questions"][0]["source_id"] == "anatomy-source"
+    assert (
+        result["questions"][0]["source_url"] == "https://example.edu/anatomy/lesson"
+    )

@@ -63,8 +63,63 @@ def guide():
     )
 
 
+def test_opening_skills_are_optional_and_bounded():
+    opening = r.Opening(
+        title="Data assistant",
+        provider="Example",
+        location="Kigali",
+        url="https://example.edu/role",
+        type="Internship",
+        eligibility="Early-career applicants.",
+        deadline_note="Apply by the listed date.",
+        availability_note="Applications open.",
+        open_status="unknown",
+        open_evidence="",
+        deadline=None,
+        published_date=None,
+    )
+    assert opening.required_skills == []
+    opening.required_skills = ["Spreadsheets", "Data analysis"]
+    assert opening.model_dump()["required_skills"] == [
+        "Spreadsheets",
+        "Data analysis",
+    ]
+    invalid = opening.model_dump()
+    invalid["required_skills"] = [f"Skill {index}" for index in range(9)]
+    with pytest.raises(ValueError):
+        r.Opening(**invalid)
+
+
 def test_citation_grounding_costs_and_regulated_plan():
     g = guide()
+    g.places.append(
+        r.Place(
+            name="Search results, not an institution",
+            kind="School",
+            location="Kigali",
+            url="https://www.google.com/search?q=nursing+schools",
+            entry_route="Search result only.",
+            cost_note="Unknown.",
+            availability_note="Unknown.",
+            accreditation_note="Unknown.",
+        )
+    )
+    g.opportunities.append(
+        r.Opening(
+            title="Search results, not an opportunity",
+            provider="Search engine",
+            location="Kigali",
+            url="https://www.google.com/url?q=https%3A%2F%2Fexample.edu%2Fjobs",
+            type="Job",
+            eligibility="Unknown.",
+            deadline_note="Unknown.",
+            availability_note="Unknown.",
+            open_status="unknown",
+            open_evidence="",
+            deadline=None,
+            published_date=None,
+        )
+    )
     g.resources.append(
         r.LearningSource(
             id="paid",
@@ -82,9 +137,15 @@ def test_citation_grounding_costs_and_regulated_plan():
     sources = {
         r.canonical_url(URL): {},
         r.canonical_url("https://example.edu/nursing"): {},
+        r.canonical_url("https://www.google.com/search?q=nursing+schools"): {},
+        r.canonical_url(
+            "https://www.google.com/url?q=https%3A%2F%2Fexample.edu%2Fjobs"
+        ): {},
     }
     result = r.validate_guide(g, sources, PROFILE)
     assert [x["id"] for x in result["resources"]] == ["anatomy"]
+    assert [x["url"] for x in result["places"]] == ["https://example.edu/nursing"]
+    assert result["opportunities"] == []
     assert [x["week"] for x in result["weeks"]] == [1, 2, 3, 4]
     assert all(
         "medication administration" not in w["task"].lower() for w in result["weeks"]
@@ -241,12 +302,38 @@ def test_search_pipeline_combines_three_searches_and_grounded_structure(monkeypa
             )
 
         async def parse(self, **kwargs):
-            return SimpleNamespace(output_parsed=guide())
+            if kwargs.get("text_format") is r.DiscoveryExpansion:
+                return SimpleNamespace(
+                    output_parsed=r.DiscoveryExpansion(
+                        places=guide().places,
+                        opportunities=[
+                            r.Opening(
+                                title="Nursing scholarship",
+                                provider="Example school",
+                                location="Kigali",
+                                url="https://example.edu/nursing",
+                                type="Scholarship",
+                                eligibility="Confirm school requirements",
+                                required_skills=[],
+                                deadline_note="Apply by deadline",
+                                availability_note="Applications open",
+                                open_status="current_open",
+                                open_evidence="Applications open; apply by deadline",
+                                deadline="2099-01-01",
+                                published_date=None,
+                            )
+                        ],
+                    )
+                )
+            initial = guide()
+            initial.places = []
+            return SimpleNamespace(output_parsed=initial)
 
     monkeypatch.setattr(r, "AsyncOpenAI", FakeClient)
     result = asyncio.run(r.build_guide(PROFILE, "Kigali", "Rwanda", lambda _: None))
-    assert len(calls) == 3 and all(c["tools"][0]["type"] == "web_search" for c in calls)
+    assert len(calls) == 4 and all(c["tools"][0]["type"] == "web_search" for c in calls)
     assert len(result["sources"]) == 2 and len(result["weeks"]) == 4
+    assert len(result["places"]) == 1 and len(result["opportunities"]) == 1
     assert "Private learner name" not in str(calls)
 
 
@@ -402,6 +489,87 @@ def test_invalid_plan_is_repaired_once_without_repeating_web_search(monkeypatch)
             {**PROFILE, "goal": "Learn anatomy"}, "Kigali", "Rwanda", lambda _: None
         )
     )
-    assert counts == {"search": 3, "parse": 2}
+    assert counts == {"search": 4, "parse": 3}
     assert inputs[1]["correction"].startswith("Invalid plan resource or effort")
     assert result["weeks"][0]["resource_id"] == "anatomy"
+
+
+def test_streamed_orientation_is_previewed_without_exposing_unverified_links():
+    from types import SimpleNamespace
+    from app.services.matching.research import stream_guide
+
+    previews = []
+    final = SimpleNamespace(output_parsed="final")
+
+    class Stream:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            pass
+
+        def __aiter__(self):
+            async def events():
+                yield SimpleNamespace(
+                    type="response.output_text.delta",
+                    parsed={
+                        "orientation": "Learn cloud foundations",
+                        "resources": [{"url": "https://unverified.invalid"}],
+                    },
+                )
+
+            return events()
+
+        async def get_final_response(self):
+            return final
+
+    client = SimpleNamespace(responses=SimpleNamespace(stream=lambda **_: Stream()))
+
+    def stage(_):
+        pass
+
+    stage.draft = previews.append
+    result = asyncio.run(stream_guide(client, stage, model="test"))
+    assert result is final
+    assert previews == ["Learn cloud foundations"]
+
+
+def test_paid_resources_are_separate_and_never_used_as_free_plan_sources():
+    g = guide()
+    paid_url = "https://example.org/paid-course"
+    g.paid_resources = [
+        r.LearningSource(
+            id="paid",
+            title="Paid study option",
+            provider="Example",
+            url=paid_url,
+            format="Online course",
+            access_note="Payment required",
+            why_it_fits="Additional supported learning",
+            skill="Anatomy",
+            access_type="paid_program",
+            cost_evidence="Provider states payment required",
+        )
+    ]
+    result = r.validate_guide(
+        g,
+        {
+            r.canonical_url(URL): {"url": URL, "title": "Free lesson"},
+            r.canonical_url(paid_url): {"url": paid_url, "title": "Paid study option"},
+        },
+        PROFILE,
+    )
+    assert result["paid_resources"][0]["id"] == "paid"
+    assert all(week["resource_id"] != "paid" for week in result["weeks"])
+    assert all(
+        resource["access_type"] == "free_content" for resource in result["resources"]
+    )
+
+
+def test_online_training_route_is_kept_and_not_relabelled_as_local_campus():
+    g = guide()
+    g.places[0].location = "Online"
+    result = r.validate_guide(
+        g, {r.canonical_url(URL): {}, r.canonical_url(g.places[0].url): {}}, PROFILE
+    )
+    assert result["places"][0]["location"] == "Online"

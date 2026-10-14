@@ -1,6 +1,6 @@
 from typing import Literal
-from app.contracts.schemas import MatchingAssessment
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response
+from app.contracts.schemas import BranchReviewRequest, MatchingAssessment
 from app.core.clients import service_call
 
 router = APIRouter(tags=["Matching"])
@@ -37,3 +37,29 @@ async def recommendations(
     resources = (learner.get("plan") or {}).get("resources", []) + resources
     opportunities = (await service_call("catalog", "/opportunities", request)).json()
     return await discover(learner, reviews, resources, opportunities, market=country)
+
+
+@router.post("/pathway/branch-review")
+async def branch_review(
+    data: BranchReviewRequest, request: Request, response: Response
+):
+    from app.services.matching.intelligence import (
+        GuidanceCooldown,
+        guidance_failure_reason,
+        review_branch,
+    )
+
+    response.headers["Cache-Control"] = "no-store"
+    learner = (await service_call("learner", "/me", request)).json()
+    work = (
+        await service_call(
+            "learner", f"/weeks/{data.week}/work", request
+        )
+    ).json()
+    resources = (await service_call("catalog", "/resources", request)).json()
+    try:
+        return await review_branch(learner, work, resources)
+    except GuidanceCooldown as exc:
+        raise HTTPException(503, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(503, guidance_failure_reason(exc)) from exc

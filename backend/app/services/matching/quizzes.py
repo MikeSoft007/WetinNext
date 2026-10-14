@@ -1,6 +1,7 @@
 """Practice generated from web-cited lessons on the learner's source providers."""
 
 import json
+import logging
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from fastapi import APIRouter, Depends, HTTPException
 from openai import AsyncOpenAI
@@ -11,6 +12,7 @@ from app.contracts.schemas import QuizBuild
 from .research import sources_from, canonical_url
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def clean_url(url):
@@ -137,18 +139,62 @@ async def build(body: QuizBuild, owner: str = Depends(identity)):
             raise ValueError("Invalid question set")
         for q in quiz.questions:
             key = canonical_url(clean_url(q.source_url))
-            if (
-                q.source_id not in resources
-                or key not in cited
-                or not same_provider(q.source_url, resources[q.source_id]["url"])
-                or len(set(q.options)) != 4
-            ):
+            if key not in cited or len(set(q.options)) != 4:
                 raise ValueError("Unsupported question citation")
+            matching_resources = [
+                resource
+                for resource in resources.values()
+                if same_provider(cited[key]["url"], resource["url"])
+            ]
+            if not matching_resources:
+                raise ValueError("Unsupported question citation")
+            resource = next(
+                (
+                    candidate
+                    for candidate in matching_resources
+                    if candidate["id"] == q.source_id
+                ),
+                matching_resources[0],
+            )
+            q.source_id = resource["id"]
             q.source_url = cited[key]["url"]
             q.source_title = cited[key]["title"]
         return quiz.model_dump()
-    except Exception:
+    except Exception as exc:
+        error_name = type(exc).__name__
+        logger.warning("Practice quiz generation failed: %s", error_name)
+        if error_name in {"APITimeoutError", "TimeoutError"}:
+            detail = (
+                "The lesson search took too long. Your saved work is unchanged. "
+                "Try again shortly."
+            )
+        elif error_name == "RateLimitError":
+            detail = (
+                "Practice generation is temporarily rate-limited. "
+                "Your saved work is unchanged; try again shortly."
+            )
+        elif error_name in {"AuthenticationError", "PermissionDeniedError"}:
+            detail = (
+                "Practice generation is unavailable because the AI provider "
+                "could not authorize the request. Your saved work is unchanged."
+            )
+        elif error_name == "ValueError" and str(exc) == "No specific cited lessons":
+            detail = (
+                "The lesson search did not return a verifiable lesson from the "
+                "learning providers in this plan. Your saved work is unchanged. "
+                "Refresh goal research to try different sources, or retry later."
+            )
+        elif error_name == "ValueError" and str(exc) == "Unsupported question citation":
+            detail = (
+                "The generated questions did not match the verified lesson sources. "
+                "Your saved work is unchanged. Retry shortly or refresh goal research."
+            )
+        else:
+            detail = (
+                "The lesson search or quiz validation failed. Your saved work is "
+                "unchanged. Retry shortly; if it continues, refresh goal research."
+            )
         raise HTTPException(
             503,
-            "Could not verify specific learning lessons for this practice. Your saved work is unchanged. Try refreshing the goal research or retry shortly.",
-        )
+            detail,
+        ) from exc

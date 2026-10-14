@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { api } from "../../shared/api";
 import { navigateApp } from "../../app/useSectionRoute";
 import { ArrowRight, Check, Flag, Sprout } from "lucide-react";
 import type { State } from "../../shared/types";
@@ -5,11 +7,32 @@ export default function ProgressOverview({
   state,
   onStart,
   onContinue,
+  onWeekClick,
 }: {
   state: State | null;
   onStart: () => void;
   onContinue: () => void;
+  onWeekClick?: (week: number) => void;
 }) {
+  const [signals, setSignals] = useState<{
+    evidence_count: number;
+    cv_reviewed: boolean;
+    practice: { correct: number; total: number } | null;
+  } | null>(null);
+  useEffect(() => {
+    let active = true;
+    setSignals(null);
+    if (state?.plan)
+      api<typeof signals>("/me/readiness")
+        .then((value) => {
+          if (active && value && typeof value.evidence_count === "number")
+            setSignals(value);
+        })
+        .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [state]);
   const plan = state?.plan;
   const completed = Object.values(state?.progress || {}).filter(
     (p) => p.status === "done",
@@ -67,11 +90,12 @@ export default function ProgressOverview({
     <section className="progress-overview">
       <div className="progress-summary">
         <div>
-          <span className="public-eyebrow">YOUR SPRINT AT A GLANCE</span>
+          <span className="public-eyebrow">CAREER PREPARATION OVERVIEW</span>
           <h2>{state?.profile.goal}</h2>
           <p className="privacy-note">
-            Complete tasks on Today, save a reflection or link, then check in.
-            Your skills and weekly progress update here.
+            Track practical work, skill evidence and application preparation.
+            These records support your next step; they do not certify job
+            readiness.
           </p>
           <p>
             {current
@@ -83,19 +107,47 @@ export default function ProgressOverview({
             <ArrowRight size={15} />
           </button>
         </div>
-        <div
-          className="progress-ring"
-          style={{
-            background: `conic-gradient(#38776d ${completed * 25}%, #edf2ef 0)`,
-          }}
-        >
+        <div className="progress-ring">
           <div>
             <strong>
               {completed}
-              <small>/4</small>
+              <small>/{plan.weeks.length}</small>
             </strong>
             <span>weeks complete</span>
           </div>
+        </div>
+      </div>
+      <div
+        className="career-progress-metrics"
+        aria-label="Career preparation signals"
+      >
+        <div>
+          <strong>
+            {completed}/{plan.weeks.length}
+          </strong>
+          <span>Weeks completed</span>
+        </div>
+        <div>
+          <strong>{signals ? signals.evidence_count : "—"}</strong>
+          <span>Work evidence saved</span>
+        </div>
+        <div>
+          <strong>
+            {signals?.practice
+              ? `${signals.practice.correct}/${signals.practice.total}`
+              : "Not taken"}
+          </strong>
+          <span>Latest practice check</span>
+        </div>
+        <div>
+          <strong>
+            {signals
+              ? signals.cv_reviewed
+                ? "Reviewed"
+                : "Not reviewed"
+              : "—"}
+          </strong>
+          <span>CV evidence</span>
         </div>
       </div>
       <ol className="progress-milestones">
@@ -108,20 +160,26 @@ export default function ProgressOverview({
                 done ? "done" : current?.week === week.week ? "current" : ""
               }
             >
-              <span className="milestone-dot">
-                {done ? <Check size={15} /> : week.week}
-              </span>
-              <div>
-                <small>WEEK {week.week}</small>
-                <strong>{week.title}</strong>
-                <span>
-                  {done
-                    ? "Completed"
-                    : current?.week === week.week
-                      ? "In progress"
-                      : "Up next"}
+              <button
+                className="week-milestone-button"
+                onClick={() => onWeekClick?.(week.week)}
+                aria-label={`Review week ${week.week}: ${week.title}`}
+              >
+                <span className="milestone-dot">
+                  {done ? <Check size={15} /> : week.week}
                 </span>
-              </div>
+                <div>
+                  <small>WEEK {week.week}</small>
+                  <strong>{week.title}</strong>
+                  <span>
+                    {done
+                      ? "Completed"
+                      : current?.week === week.week
+                        ? "In progress"
+                        : "Up next"}
+                  </span>
+                </div>
+              </button>
             </li>
           );
         })}
