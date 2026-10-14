@@ -70,3 +70,9 @@ codex-clipboard-*
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Private rehearsal and judging preparation (keep local copies).
+/docs/submission/DEMO.md
+/docs/submission/DEMO_REHEARSAL.md
+/docs/submission/PRESENTATION.md
+/docs/submission/RUBRIC.md
