@@ -161,6 +161,7 @@ export default function GoalResearch({
   const goal = state?.profile.goal || "";
   const storageKey = `wetinnext-research:${market}:${goal}`;
   const [showImages, setShowImages] = useState(false);
+  const [learningView, setLearningView] = useState("free");
   useEffect(() => {
     const syncView = () => {
       const view = new URLSearchParams(location.search).get("view");
@@ -805,99 +806,163 @@ export default function GoalResearch({
             ))}
           </nav>
           {tab === "learn" && (
-            <div className="research-learning">
-              {(guide.paid_resources ?? [])
-                .filter(
-                  (source) => isDirectSource(source.url) && matches(source),
-                )
-                .map((source) => (
-                  <article className="paid-learning-row" key={source.id}>
-                    <div>
-                      <span className="response-cost-tag">Paid</span>
-                      <span className="eyebrow">
-                        {source.provider} · {source.format}
-                      </span>
-                      <h3>
-                        <a href={source.url} target="_blank" rel="noreferrer">
-                          {source.title} <ArrowUpRight size={15} />
-                        </a>
-                      </h3>
-                      <p>{source.why_it_fits}</p>
-                      <small>{source.access_note}</small>
-                    </div>
-                  </article>
-                ))}
-
-              {matchingResources.map((source, index) => (
-                <article key={source.id}>
-                  <span className="research-number">
-                    <BookOpen size={23} strokeWidth={1.4} />
-                    <small>{String(index + 1).padStart(2, "0")}</small>
-                  </span>
-                  <div>
-                    <span className="response-cost-tag">Free</span>
-                    <span className="eyebrow">
-                      {source.provider} · {source.format}
-                    </span>
-                    <h3>
-                      <a href={source.url} target="_blank" rel="noreferrer">
-                        {source.title}
-                        <ArrowUpRight size={17} />
-                      </a>
-                    </h3>
-                    <p>{source.why_it_fits}</p>
-                    <div className="resource-action-row">
-                      <a
-                        className="source-citation"
-                        href={source.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {citation(source.url)
-                          ? `[${citation(source.url)}] `
-                          : ""}
-                        {domain(source.url)}
-                        <ArrowUpRight size={12} />
-                      </a>
-                      <button
-                        className="text-link"
-                        disabled={
-                          pickBusy === source.id ||
-                          picks.some((pick) => pick.url === source.url)
-                        }
-                        onClick={() => void savePick(source)}
-                      >
-                        {picks.some((pick) => pick.url === source.url) ? (
-                          <>
-                            <Check size={14} />
-                            Saved to Progress
-                          </>
-                        ) : (
-                          <>
-                            <Bookmark size={14} />
-                            Save for later
-                          </>
-                        )}
-                      </button>
-                    </div>
-                    <details className="resource-access">
-                      <summary>Access & format</summary>
-                      <small>{source.access_note}</small>
-                    </details>
-                  </div>
-                </article>
+            <nav
+              className="learning-view-tabs"
+              aria-label="Learning result types"
+            >
+              {[
+                ["free", `Free resources · ${matchingResources.length}`],
+                ["paid", `Paid options · ${guide.paid_resources?.length || 0}`],
+                ["schools", `Schools & training · ${matchingPlaces.length}`],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  aria-pressed={learningView === id}
+                  onClick={() => setLearningView(id)}
+                >
+                  {label}
+                </button>
               ))}
-              {verifiedResources.length > 0 &&
-                matchingResources.length === 0 && (
-                  <p role="status">
-                    No learning picks match this search. Clear or change the
-                    Discover search to see all {verifiedResources.length}{" "}
-                    verified picks.
-                  </p>
-                )}
+            </nav>
+          )}
+          {tab === "learn" && learningView !== "schools" && (
+            <div className="research-learning">
+              {learningView === "paid" && (
+                <div>
+                  {!!guide.paid_resources?.length && (
+                    <h3 className="learning-section-title">
+                      Optional paid learning
+                    </h3>
+                  )}
+                  <LocalCollection
+                    items={(guide.paid_resources ?? []).filter(
+                      (source) => isDirectSource(source.url) && matches(source),
+                    )}
+                    label="paid learning"
+                    pageSize={4}
+                    searchable={false}
+                  >
+                    {(visible) =>
+                      visible.map((source) => (
+                        <article className="paid-learning-row" key={source.id}>
+                          <div>
+                            <span className="response-cost-tag">Paid</span>
+                            <span className="eyebrow">
+                              {source.provider} · {source.format}
+                            </span>
+                            <h3>
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {source.title} <ArrowUpRight size={15} />
+                              </a>
+                            </h3>
+                            <p>{source.why_it_fits}</p>
+                            <small>{source.access_note}</small>
+                          </div>
+                        </article>
+                      ))
+                    }
+                  </LocalCollection>
+                  {!guide.paid_resources?.length && (
+                    <p>No sourced paid options for this guide.</p>
+                  )}
+                </div>
+              )}
+              {learningView === "free" && (
+                <div>
+                  <h3 className="learning-section-title">
+                    Free learning resources
+                  </h3>
+                  <LocalCollection
+                    items={matchingResources}
+                    label="free learning"
+                    pageSize={4}
+                    searchable={false}
+                  >
+                    {(visible) =>
+                      visible.map((source, index) => (
+                        <article key={source.id}>
+                          <span className="research-number">
+                            <BookOpen size={23} strokeWidth={1.4} />
+                            <small>{String(index + 1).padStart(2, "0")}</small>
+                          </span>
+                          <div>
+                            <span className="response-cost-tag">Free</span>
+                            <span className="eyebrow">
+                              {source.provider} · {source.format}
+                            </span>
+                            <h3>
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {source.title}
+                                <ArrowUpRight size={17} />
+                              </a>
+                            </h3>
+                            <p>{source.why_it_fits}</p>
+                            <div className="resource-action-row">
+                              <a
+                                className="source-citation"
+                                href={source.url}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {citation(source.url)
+                                  ? `[${citation(source.url)}] `
+                                  : ""}
+                                {domain(source.url)}
+                                <ArrowUpRight size={12} />
+                              </a>
+                              <button
+                                className="text-link"
+                                disabled={
+                                  pickBusy === source.id ||
+                                  picks.some((pick) => pick.url === source.url)
+                                }
+                                onClick={() => void savePick(source)}
+                              >
+                                {picks.some(
+                                  (pick) => pick.url === source.url,
+                                ) ? (
+                                  <>
+                                    <Check size={14} />
+                                    Saved to Progress
+                                  </>
+                                ) : (
+                                  <>
+                                    <Bookmark size={14} />
+                                    Save for later
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                            <details className="resource-access">
+                              <summary>Access & format</summary>
+                              <small>{source.access_note}</small>
+                            </details>
+                          </div>
+                        </article>
+                      ))
+                    }
+                  </LocalCollection>
+                  {verifiedResources.length > 0 &&
+                    matchingResources.length === 0 && (
+                      <p role="status">
+                        No learning picks match this search. Clear or change the
+                        Discover search to see all {verifiedResources.length}{" "}
+                        verified picks.
+                      </p>
+                    )}
+                </div>
+              )}
             </div>
           )}
-          {tab === "learn" && (
+          {tab === "learn" && learningView === "schools" && (
             <div className="research-nearby">
               <header>
                 <h3>
@@ -936,7 +1001,7 @@ export default function GoalResearch({
                 <LocalCollection
                   items={matchingPlaces}
                   label="training places"
-                  pageSize={6}
+                  pageSize={4}
                   searchable={false}
                 >
                   {(visible) =>

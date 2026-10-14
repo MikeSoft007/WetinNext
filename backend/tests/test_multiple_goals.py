@@ -122,3 +122,21 @@ def test_signed_in_account_survives_new_browser_and_is_separate_from_demo(
         other.get("/api/v1/auth/session", headers=auth).json()["id"]
         == "stable-account-123"
     )
+
+
+def test_delete_goal_is_owned_persistent_and_preserves_identity(clients):
+    client, other, _, _ = clients
+    client.put("/api/v1/me/profile", json=FRONT)
+    first = client.get("/api/v1/me").json()["goal_id"]
+    client.put("/api/v1/me/goal", json=NURSE)
+    second = client.get("/api/v1/me").json()["goal_id"]
+    assert other.delete(f"/api/v1/me/goals/{second}").status_code == 404
+    assert client.delete(f"/api/v1/me/goals/{second}").status_code == 200
+    assert client.get("/api/v1/me").json()["goal_id"] == first
+    assert all(g["id"] != second for g in client.get("/api/v1/me/goals").json())
+    assert client.delete(f"/api/v1/me/goals/{first}").status_code == 200
+    state = client.get("/api/v1/me").json()
+    assert state["profile"]["name"] == FRONT["name"]
+    assert state["profile"]["goal"] == ""
+    assert state["plan"] is None
+    assert client.get("/api/v1/me/goals").json() == []

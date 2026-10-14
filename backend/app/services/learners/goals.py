@@ -123,3 +123,71 @@ def activate(gid: str, row: Learner = Depends(learner), session: Session = Depen
     record.updated_at = datetime.now(timezone.utc).isoformat()
     session.commit()
     return {"saved": True}
+
+
+@router.delete("/me/goals/{gid}")
+def delete_goal(
+    gid: str, row: Learner = Depends(learner), session: Session = Depends(db)
+):
+    from sqlalchemy import delete
+    from .models import (
+        WeekWork,
+        AssessmentAttempt,
+        GoalReminder,
+        LearningPick,
+        LearningBranch,
+    )
+
+    recover_history(row, session)
+    record = session.get(GoalWorkspace, gid)
+    if not record or record.learner_id != row.id:
+        raise HTTPException(404, "Goal not found.")
+    snapshot = json.loads(record.payload)
+    title = snapshot["profile"]["goal"]
+    sprint_ids = {snapshot.get("plan", {}).get("id")} if snapshot.get("plan") else set()
+    # Remove revisions too, otherwise history recovery would resurrect this goal.
+    for revision in session.scalars(
+        select(PlanRevision).where(PlanRevision.learner_id == row.id)
+    ).all():
+        data = json.loads(revision.payload)
+        if goal_id(row, data.get("profile", {}).get("goal", "")) == gid:
+            if data.get("plan"):
+                sprint_ids.add(data["plan"].get("id"))
+            session.delete(revision)
+    for model in [GoalReminder, LearningPick, LearningBranch]:
+        session.execute(
+            delete(model).where(model.learner_id == row.id, model.goal_id == gid)
+        )
+    session.execute(
+        delete(AssessmentAttempt).where(
+            AssessmentAttempt.learner_id == row.id, AssessmentAttempt.goal == title
+        )
+    )
+    if sprint_ids:
+        session.execute(
+            delete(WeekWork).where(
+                WeekWork.learner_id == row.id, WeekWork.sprint_id.in_(sprint_ids)
+            )
+        )
+    if goal_id(row) == gid:
+        replacement = session.scalars(
+            select(GoalWorkspace)
+            .where(GoalWorkspace.learner_id == row.id, GoalWorkspace.id != gid)
+            .order_by(GoalWorkspace.updated_at.desc())
+        ).first()
+        if replacement:
+            data = json.loads(replacement.payload)
+            data["profile"]["name"] = json.loads(row.profile).get("name", "")
+            for key in ["profile", "plan", "progress", "applications"]:
+                setattr(
+                    row, key, json.dumps(data.get(key, None if key == "plan" else {}))
+                )
+        else:
+            profile = json.loads(row.profile)
+            profile["goal"] = ""
+            profile["career_track"] = "auto"
+            row.profile = json.dumps(profile)
+            row.plan, row.progress, row.applications = "null", "{}", "{}"
+    session.delete(record)
+    session.commit()
+    return {"deleted": True, "active_goal_id": goal_id(row)}

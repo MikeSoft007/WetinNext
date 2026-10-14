@@ -8917,3 +8917,730 @@ textarea {
   display: inline-flex;
   margin: 8px 12px 0 0;
 }
+
+/* Compact workspace rhythm: flat surfaces and clear section hierarchy. */
+.app-shell .workspace-main {
+  background: #fff;
+}
+.app-shell .primary {
+  background: #0f172a;
+  background-image: none;
+  box-shadow: none;
+  border: 1px solid #0f172a;
+}
+.app-shell .secondary {
+  background: #fff;
+  background-image: none;
+  box-shadow: none;
+  border: 1px solid #d1d5db;
+}
+.app-shell .discover-library-layout {
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 28px;
+  align-items: start;
+}
+.app-shell .goal-prompt {
+  margin-bottom: 24px;
+}
+.app-shell .research-intro {
+  padding: 0;
+  margin: 0 0 20px;
+}
+.app-shell .research-intro h2 {
+  font-size: clamp(23px, 2vw, 30px);
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+.app-shell .research-intro p {
+  max-width: 76ch;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.app-shell .research-response {
+  margin-top: 0;
+}
+.app-shell .guide-provenance {
+  margin: 12px 0;
+  gap: 12px;
+}
+.app-shell .research-source-strip {
+  margin: 10px 0 16px;
+}
+.app-shell .research-route,
+.app-shell .research-visual-control {
+  margin: 12px 0;
+}
+.app-shell .research-start-plan {
+  margin: 20px 0;
+  padding: 14px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+.app-shell .research-tabs {
+  margin: 0 0 20px;
+  padding: 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.app-shell .research-tabs button {
+  background: #fff;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+}
+.app-shell .research-tabs button[aria-pressed="true"] {
+  background: #fff;
+  color: #0f766e;
+  border-bottom-color: #0f766e;
+}
+.app-shell .research-learning article,
+.app-shell .research-place,
+.app-shell .research-opening {
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 18px 0;
+  margin: 0;
+}
+.app-shell .discovery-library-rail {
+  padding-left: 24px;
+  background: #fff;
+}
+.app-shell .library-rail-tabs {
+  gap: 8px;
+}
+.app-shell .library-rail-tabs button {
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+.app-shell .progress-page {
+  display: grid;
+  gap: 24px;
+}
+.app-shell .progress-overview {
+  padding: 0;
+  background: #fff;
+  border: 0;
+  box-shadow: none;
+}
+.app-shell .progress-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  padding: 0 0 22px;
+}
+.app-shell .progress-summary h2 {
+  font-size: 28px;
+  margin: 8px 0;
+}
+.app-shell .progress-summary .privacy-note {
+  max-width: 70ch;
+}
+.app-shell .progress-ring {
+  width: 100px;
+  height: 100px;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.app-shell .career-progress-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+  background: #fff;
+  border-block: 1px solid #e2e8f0;
+}
+.app-shell .career-progress-metrics strong {
+  font-size: 23px;
+  color: #0f172a;
+}
+.app-shell .career-progress-metrics span {
+  font-size: 12px;
+  color: #64748b;
+}
+.app-shell .progress-milestones {
+  gap: 12px;
+  padding: 20px 0;
+  margin: 0;
+}
+.app-shell .week-milestone-button {
+  height: 100%;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+.app-shell .progress-milestones .current .week-milestone-button {
+  background: #f0fdfa;
+  border-color: #99c9c2;
+}
+.app-shell .week-milestone-button:hover {
+  border-color: #0f766e;
+}
+@media (max-width: 1100px) {
+  .app-shell .discover-library-layout {
+    grid-template-columns: 1fr;
+  }
+  .app-shell .discovery-library-rail {
+    padding: 20px 0 0;
+    border-left: 0;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+@media (max-width: 640px) {
+  .app-shell .career-progress-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app-shell .progress-summary {
+    gap: 12px;
+  }
+  .app-shell .progress-ring {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.app-shell .discover-main,
+.app-shell .research-studio,
+.app-shell .research-response {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.app-shell .research-intro {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+.app-shell .research-intro h2,
+.app-shell .research-intro p {
+  overflow-wrap: anywhere;
+}
+.learning-view-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 20px;
+}
+.learning-view-tabs button {
+  padding: 9px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #475569;
+}
+.learning-view-tabs button[aria-pressed="true"] {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+/* Neutral reading surface with the guide aligned to its content frame. */
+.app-shell .research-intro p {
+  max-width: none;
+  width: 100%;
+  margin: 10px 0 12px;
+  line-height: 1.65;
+  color: #475569;
+}
+.app-shell .research-context {
+  margin-top: 10px;
+}
+.app-shell .research-visual-control {
+  display: flex;
+  justify-content: flex-start;
+  margin: 12px 0;
+  padding: 0;
+  min-height: 0;
+}
+.app-shell .research-response .research-route {
+  margin: 10px 0;
+  padding: 8px 0;
+}
+.app-shell .research-source-strip a,
+.app-shell .source-pill,
+.app-shell .response-cost-tag {
+  background: #f1f5f9;
+  color: #475569;
+  background-image: none;
+}
+.app-shell .research-learning article,
+.app-shell .research-place {
+  gap: 14px;
+  padding: 14px 0;
+  align-items: start;
+}
+.app-shell .research-learning article > div,
+.app-shell .research-place > div {
+  min-width: 0;
+  width: 100%;
+}
+.app-shell .research-learning article p,
+.app-shell .research-place p {
+  margin: 7px 0;
+  line-height: 1.6;
+  color: #475569;
+}
+.app-shell .research-learning h3,
+.app-shell .research-place h3 {
+  margin: 6px 0;
+  font-size: 17px;
+  color: #0f172a;
+}
+.app-shell .research-number,
+.app-shell .institution-tile {
+  background: #f8fafc;
+  background-image: none;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+}
+.app-shell .learning-section-title {
+  margin: 14px 0 8px;
+  font-size: 16px;
+}
+.app-shell .roadmap-ribbon {
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.app-shell .roadmap-ribbon a {
+  background: #f8fafc;
+  background-image: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #0f172a;
+  padding: 12px;
+  min-height: 86px;
+}
+.app-shell .roadmap-ribbon a > span {
+  background: #e2e8f0;
+  color: #475569;
+}
+.app-shell .roadmap-ribbon strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+.app-shell .roadmap-ribbon small {
+  color: #64748b;
+}
+.app-shell .research-plan-heading {
+  margin: 18px 0;
+  padding: 0;
+}
+.app-shell .research-plan ol {
+  margin: 0;
+  padding: 0;
+}
+.app-shell .research-plan li {
+  margin: 0;
+  padding: 14px 0;
+  gap: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  min-height: 0;
+}
+.app-shell .research-plan li:not(:last-child):before {
+  display: none;
+}
+.app-shell .research-plan li > span {
+  background: #f1f5f9;
+  color: #475569;
+}
+.app-shell .research-plan li > div {
+  flex: 1;
+  min-width: 0;
+}
+.app-shell .research-week-detail summary h3 {
+  color: #0f172a;
+  font-size: 17px;
+  margin: 6px 0;
+}
+.app-shell .research-evidence {
+  background: #f8fafc;
+  background-image: none;
+  color: #475569;
+  border-left-color: #94a3b8;
+}
+
+/* Course and institution cards share a consistent icon/content alignment. */
+.app-shell .research-learning article,
+.app-shell .research-nearby .research-place {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px;
+  margin: 0 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 3%);
+  align-items: start;
+}
+.app-shell .research-learning article.paid-learning-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.app-shell .research-learning .research-number,
+.app-shell .research-place .institution-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  width: 48px;
+  height: 56px;
+  min-width: 48px;
+  padding: 6px;
+  margin: 0;
+  gap: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  box-sizing: border-box;
+}
+.app-shell .research-number svg,
+.app-shell .institution-tile svg {
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+}
+.app-shell .research-number small,
+.app-shell .institution-tile small {
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.app-shell .research-learning article .eyebrow,
+.app-shell .research-place .eyebrow {
+  display: inline;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+.app-shell .research-learning article h3,
+.app-shell .research-place h3 {
+  margin: 7px 0;
+  line-height: 1.4;
+}
+.app-shell .research-learning article h3 a {
+  display: inline;
+}
+.app-shell .research-learning article h3 a svg {
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.app-shell .research-place-links,
+.app-shell .resource-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.app-shell .research-place details,
+.app-shell .resource-access {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+@media (max-width: 600px) {
+  .app-shell .research-learning article,
+  .app-shell .research-nearby .research-place {
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding: 14px;
+    gap: 12px;
+  }
+  .app-shell .research-learning .research-number,
+  .app-shell .research-place .institution-tile {
+    width: 40px;
+    min-width: 40px;
+    height: 48px;
+  }
+}
+
+/* Balanced library grid; fixed icon sizing prevents collisions with text. */
+.app-shell .research-learning .collection,
+.app-shell .research-nearby .collection:has(.research-place) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+.app-shell .research-learning .collection > .pagination,
+.app-shell .research-nearby .collection:has(.research-place) > .pagination {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+}
+.app-shell .research-learning .collection > article,
+.app-shell .research-nearby .collection > .research-place {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: none;
+  background: #fff;
+}
+.app-shell .research-learning .collection > .paid-learning-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.app-shell .research-learning .collection .research-number,
+.app-shell .research-nearby .research-place .place-icon.institution-tile {
+  position: static;
+  inset: auto;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  max-width: 32px;
+  padding: 6px;
+  background: #f1f5f9;
+  border: 0;
+  border-radius: 6px;
+  color: #64748b;
+  flex: none;
+  transform: none;
+  box-sizing: border-box;
+}
+.app-shell .research-number small,
+.app-shell .research-place .institution-tile small {
+  display: none;
+}
+.app-shell .research-learning .research-number svg,
+.app-shell .research-nearby .institution-tile svg {
+  width: 20px;
+  height: 20px;
+}
+.app-shell .research-nearby .research-place > div,
+.app-shell .research-learning article > div {
+  min-width: 0;
+  padding: 0;
+}
+.app-shell .research-place .source-citation {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: #64748b;
+}
+.app-shell .research-place .eyebrow {
+  letter-spacing: 0;
+  font-weight: 500;
+  color: #64748b;
+  font-size: 11px;
+}
+.app-shell .research-nearby > header {
+  margin-bottom: 16px;
+}
+.app-shell .research-place details {
+  border-top: 0;
+  padding-top: 0;
+}
+@media (max-width: 950px) {
+  .app-shell .research-learning .collection,
+  .app-shell .research-nearby .collection:has(.research-place) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Neutral navigation and discovery surfaces, including hover/selected states. */
+.app-shell .sidebar,
+.app-shell .sidebar nav {
+  background: #fff;
+  background-image: none;
+}
+.app-shell .sidebar .nav-item {
+  background: transparent;
+  background-image: none;
+  color: #475569;
+  box-shadow: none;
+}
+.app-shell .sidebar .nav-item:hover {
+  background: #f8fafc;
+  background-image: none;
+}
+.app-shell .sidebar .nav-item.active {
+  background: #f1f5f9;
+  background-image: none;
+  color: #0f172a;
+}
+.app-shell .sidebar .nav-dot {
+  background: #475569;
+}
+.app-shell .learning-view-tabs button,
+.app-shell .library-rail-tabs button {
+  background: #fff;
+  background-image: none;
+  color: #475569;
+}
+.app-shell .learning-view-tabs button[aria-pressed="true"],
+.app-shell .library-rail-tabs button[aria-pressed="true"] {
+  background: #f1f5f9;
+  background-image: none;
+  color: #0f172a;
+}
+.app-shell .research-learning .collection > article,
+.app-shell .research-nearby .collection > .research-place {
+  background: #fff;
+  background-image: none;
+}
+.app-shell .research-nearby .research-place:nth-of-type(even) .institution-tile,
+.app-shell .research-nearby .research-place .institution-tile,
+.app-shell .research-learning .research-number,
+.app-shell .research-learning .response-cost-tag {
+  background: #f1f5f9;
+  background-image: none;
+  color: #475569;
+}
+.app-shell .research-learning .source-citation,
+.app-shell .research-place .source-citation {
+  background: transparent;
+  background-image: none;
+  color: #64748b;
+}
+.goal-history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.goal-history-row > button:first-child {
+  flex: 1;
+}
+.goal-delete-confirm {
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 8px;
+}
+.goal-delete-confirm button {
+  margin-right: 8px;
+}
+.goal-manager {
+  width: min(640px, calc(100vw - 32px));
+  max-height: 80vh;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 20px 60px rgb(15 23 42 / 18%);
+}
+.goal-manager::backdrop {
+  background: rgb(15 23 42 / 35%);
+}
+.goal-manager header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.goal-manager h2 {
+  font-size: 24px;
+  margin: 6px 0;
+}
+.goal-manager header > button,
+.goal-remove-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  color: #64748b;
+}
+.goal-manager-list {
+  margin: 18px 0;
+}
+.goal-manager-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.goal-manager-icon {
+  display: flex;
+  padding: 8px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  color: #64748b;
+}
+.goal-manager-info {
+  flex: 1;
+  min-width: 0;
+}
+.goal-manager-info strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.goal-manager-info small {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 12px;
+}
+.goal-active-label {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: #f1f5f9;
+}
+.goal-switch-action {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  background: none;
+  border: 0;
+  color: #0f766e;
+}
+.goal-remove-action:hover {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+.goal-manager footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.goal-to-delete {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 16px 0;
+}
+.goal-manager-confirm p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.goal-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #b91c1c;
+  color: white;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 7px;
+}
+.goal-manager button:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .goal-manager {
+    padding: 18px;
+  }
+  .goal-manager-icon {
+    display: none;
+  }
+}
